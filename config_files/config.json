@@ -1,0 +1,59 @@
+{
+	"id" : "lbTest",
+	"vms" : 
+	[
+		{
+			"name" : "lb",
+			"image_id" : "6d12c3f5-918c-4cb2-a034-243b7c348ac7",
+			"flavor" : 22,
+			"deployment" : "dd2c",
+			"keypair" : "sv-cah-dd2c",
+			"floating_ip" : true,
+			"cloud_init" : "/path/to/script",
+			"additional_script" : "/path/to/script" 
+		},
+		{
+			"name" : "up1",
+			"image_id" : "909e3fe7-6e60-4496-8b88-35e02de54024",
+			"flavor" : 21,
+			"deployment" : "dd1a",
+			"keypair" : "lenovo-keypair-cah",
+			"floating_ip" : true,
+			"cloud_init" : "/path/to/script",
+			"additional_script" : "/path/to/script" 
+		},
+		{
+			"name" : "up2",
+			"image_id" : "6fa52f96-be97-4fd7-a963-1e08e9c689e5",
+			"flavor" : "cloudcompute.xs",
+			"keypair" : "lenovo-keypair-dd2a",
+			"deployment" : "dd1a",
+			"floating_ip" : true,
+			"cloud_init" : "/path/to/script",
+			"additional_script" : "/path/to/script" 
+		}
+	],
+	"testURL" : 
+	{
+		"machine" : "lb",
+		"website" : "",
+		"path" : ""
+	},
+	"output" : 
+	{
+		"path" : "/myfile.json",
+		"mail" : "abc@de.fg"
+	},
+	"failover_trigger" : "nova restart abcse",
+	"creds" :
+	{
+		"os_username" : ,
+		"os_password" : ,
+		"os_tenant_name" : 
+		
+	},
+	"timeout" : "300",
+	"rep_cnt" : 1,
+	"notes" : "test run"
+
+}
