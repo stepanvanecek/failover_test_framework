@@ -90,7 +90,7 @@ size_t UrlRequester::write_callback_func(void *ptr, size_t size, size_t nmemb, R
 
 void * UrlRequester::pull_one_url(void * urll)
 {
-//*
+/*
     char * c = (char *)malloc(sizeof(char *)*10);
     Response * r = new Response();
     r->ptr = c;

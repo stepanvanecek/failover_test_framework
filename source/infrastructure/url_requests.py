@@ -3,26 +3,26 @@ from StringIO import StringIO
 
 def create_request(configData):
 
-    if 'machine' in configData['testURL']:
+    if 'machine' in configData['test_url']:
         ip = ""
         for vm in configData['vms']:
-            if 'name' in vm and vm['name'] == configData['testURL']['machine']\
+            if 'name' in vm and vm['name'] == configData['test_url']['machine']\
                     and 'floating_ip_addr' in vm:
                 ip = vm['floating_ip_addr']
                 break
         if not ip:
             print "no IP for the request found"
             return -1
-        if 'path' in configData['testURL']:
-            configData['testURL']['fullURL'] = ip + configData['testURL']['path']
+        if 'path' in configData['test_url']:
+            configData['test_url']['full_url'] = ip + configData['test_url']['path']
         else:
-            configData['testURL']['fullURL'] = ip
+            configData['test_url']['full_url'] = ip
 
-    elif 'website' in configData['testURL']:
-        if 'path' in configData['testURL']:
-            configData['testURL']['fullURL'] = configData['testURL']['website'] + configData['testURL']['path']
+    elif 'website' in configData['test_url']:
+        if 'path' in configData['test_url']:
+            configData['test_url']['full_url'] = configData['test_url']['website'] + configData['test_url']['path']
         else:
-            configData['testURL']['fullURL'] = configData['testURL']['website']
+            configData['test_url']['full_url'] = configData['test_url']['website']
 
     else:
         print "missing machine or website in testURL"
@@ -43,7 +43,7 @@ def test_infrastructure(configData):
 
     buffer = StringIO()
     c = pycurl.Curl()
-    c.setopt(c.URL, configData['testURL']['fullURL'])
+    c.setopt(c.URL, configData['test_url']['full_url'])
     c.setopt(c.WRITEDATA, buffer)
     try:
         c.perform()
@@ -58,7 +58,6 @@ def test_infrastructure(configData):
     c.close()
 
     body = buffer.getvalue()
-    print(body)
 
     #TODO test
     if buffer.getvalue() == configData['response']:

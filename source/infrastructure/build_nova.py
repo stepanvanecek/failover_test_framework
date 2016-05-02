@@ -17,8 +17,8 @@ def wait_for_spawn(configData):
         while True:
             vm_data = nova.servers.get(vm['id'])
             if attempts > 30:
-                print "vm " + vm_data.name +" unable to start"
-                return -1
+                print "VM " + vm['id'] +" is unable to start."
+                exit(4)
             if vm_data.status == 'ACTIVE':
                 break
             time.sleep(5)
@@ -26,6 +26,8 @@ def wait_for_spawn(configData):
     return 1
 
 def nova_client(username, tenant_name, password, deploynemt):
+    # TODO test if client connects
+    # exceptions.Unauthorized
     return nvclient.Client(version='2',
                            username=username,
                            project_id=tenant_name,
@@ -49,30 +51,44 @@ def launch_vms(configData):
     i=0
     for vm in configData['vms']:
         i = i+1
-        vm['vm_name'] = configData['id'] + configData['launch_time'].strftime('%Y%m%d%H%M%S%f') + str(i)
+        #machine name
+        if 'name' in vm:
+            vm['vm_name'] = vm['name']
+        else:
+            vm['vm_name'] = configData['id'] + configData['launch_time'] + str(i)
 
         nova = nova_client(configData['creds']['os_username'],\
                            configData['creds']['os_tenant_name'],\
                            configData['creds']['os_password'],\
                            vm['deployment'] )
 
+        #flavors
         try: 
             val = int(vm['flavor'])
             flavor = nova.flavors.get(vm['flavor'])
         except ValueError:
-            flavor = nova.flavors.find(name = vm['flavor'])
-    
-        secgroup = nova.security_groups.find(name="default")
+            try:
+                flavor = nova.flavors.find(name = vm['flavor'])
+            except ValueError:
+                print "Flavor '" + vm['flavor'] + "' not found."
+                exit(3)
+
         image_id = vm['image_id']
 
-        key_name = vm['keypair'] #TODO vyresit klice
+        #keypairs
+        if 'keypair' in vm:
+            key_name = vm['keypair'] #TODO vyresit klice
+        else:
+            key_name = ""
 
+        #security groups
+        secgroup = nova.security_groups.find(name="default")
         check_rule("tcp", 22, 22, nova, secgroup) # SSH rule
         check_rule("tcp", 80, 80, nova, secgroup) # HTTP rule
 
-
-        if "_cloud_init" in vm: # TODO test cloud init souboru v parse_input
-            with open(vm['_cloud_init']) as udata:
+        #cloud-init script
+        if "cloud_init" in vm: # TODO test cloud init souboru v parse_input
+            with open(vm['cloud_init']) as udata:
                 userdata_script = udata.read()
         else:
             userdata_script = ""
@@ -86,35 +102,25 @@ def launch_vms(configData):
                               security_groups=['default'],
                               userdata=userdata_script)
         except exceptions.OverLimit:
-            print "overLimit cannot build"
-            return -1
+            print "Limit for the tenant reached."
+            exit(4)
         except exceptions.BadRequest:
-            print "spawning unsuccessful"
-            return -1
+            print "Spawning was unsuccessful."
+            exit(4)
+
         vm['id'] = vm_data.id
 
-
     return 1
-
-"""def associate_fip(vm_name, ip, creds):
-    import subprocess
-    command = "nova add-floating-ip --os-username <uname> --os-password <pass> --os-auth-url <authurl> --os-tenant-name <tenant> " + vm_name + " " + ip \
-        .replace('<uname>', creds['os_username']) \
-        .replace('<pass>', creds['os_password']) \
-        .replace('<authurl>', authurl) \
-        .replace('<tenant>', creds['os_tenant_name'])
-    subprocess.call(command, shell=True)
-    #TODO osetrit
-    """
 
 def allocate_fip(configData):
 
     for vm in configData['vms']:
-        if "_floating_ip" in vm:
+        if "floating_ip" in vm:
             nova = nova_client(configData['creds']['os_username'], \
                                configData['creds']['os_tenant_name'], \
                                configData['creds']['os_password'], \
                                vm['deployment'])
+
             floating_ip = ""
             for fip in nova.floating_ips.list():
                 if not fip.instance_id:
@@ -125,16 +131,16 @@ def allocate_fip(configData):
                 try:
                     floating_ip = nova.floating_ips.create()
                 except exceptions.NotFound:
-                    print "vm " + vm['id'] + " - unable to associate floating ip"
-                    return -1 #TODO
+                    print "VM " + vm['id'] + " is unable to allocate a floating ip."
+                    exit(4)
 
 
             vm['floating_ip_addr'] = floating_ip
             try:
                 nova.servers.add_floating_ip(vm['id'], floating_ip)
             except exceptions.BadRequest:
-                print vm['floating_ip_addr'] + vm['id']
-                return -1
+                print "VM " + vm['id'] + " is unable to associate a floating ip."
+                exit(4)
     return 1
 
 def reboot_vms(configData):
@@ -150,7 +156,7 @@ def build_infrastructure(configData):
         return -1
 
     wait_for_spawn(configData)
-
+    print " VMs launched."
 
     if allocate_fip(configData) == -1:
         return -1
@@ -158,5 +164,7 @@ def build_infrastructure(configData):
     reboot_vms(configData)
 
     wait_for_spawn(configData)
+
+    print " The infrastructure is ready."
 
     #TODO run additional scripts

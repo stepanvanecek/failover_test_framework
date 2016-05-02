@@ -27,20 +27,19 @@ int main(int argc, const char * argv[])
 {
     Json::Value root;
     Json::Reader reader;
+    cout << "argv[1] " << argv[1] << endl ;
     ifstream test(argv[1], std::ifstream::binary);
     bool parsingSuccessful = reader.parse( test, root, false );
     if ( !parsingSuccessful )
     {
-        // report to the user the failure and their locations in the document.
-        std::cout  << reader.getFormatedErrorMessages()
-        << "\n";
+        std::cout  << reader.getFormatedErrorMessages() << "\n";
+        exit(1);
     }
-    string id = root.get("id", "UTF-8" ).asString();
-    std::cout << id << "\n";
-
     
+    TestData * t = new TestData(&root, 5, 20);
     
-    TestData * t = new TestData(argv[2], 5, 20);
+    cout << t->url << endl;
+    
     UrlRequester *r = new UrlRequester((void*)t);
 
     r->Run();

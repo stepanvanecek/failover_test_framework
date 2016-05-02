@@ -8,7 +8,7 @@ all: run
 
 run: compile
 	#./program.o
-	time ./program.o ../../config_files/config.json http://87.190.239.41
+	time ./program.o http://87.190.239.41
 
 compile: $(OBJS)
 	$(CC) $(LFLAGS) $(OBJS) -o program.o
