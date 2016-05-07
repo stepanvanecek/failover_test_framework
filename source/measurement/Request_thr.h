@@ -14,7 +14,6 @@ class Request_thr
 public:
     pthread_t thread;
     bool active;
-    const char * url_ptr;
 };
 
 

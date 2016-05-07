@@ -4,11 +4,12 @@ LIBCURL = -lcurl
 LFLAGS = $(LIBCURL) $(JSONCPP) -std=c++11  -Wall -pedantic
 OBJS = main.o jsoncpp.o UlrRequester.o Response.o TestData.o ResponseScan.o
 
-all: run
+all: compile
 
 run: compile
 	#./program.o
-	time ./program.o http://87.190.239.41
+	time ./program.o ../tmp.json
+	#time ./program.o 87.190.239.41
 
 compile: $(OBJS)
 	$(CC) $(LFLAGS) $(OBJS) -o program.o
@@ -19,7 +20,7 @@ main.o: main.cpp Request_thr.h
 TestData.o: TestData.cpp TestData.hpp
 	$(CC) $(LFLAGS) -c TestData.cpp -o TestData.o
 
-UlrRequester.o: UlrRequester.cpp UlrRequester.hpp
+UlrRequester.o: UlrRequester.cpp UlrRequester.hpp Request_thr.h
 	$(CC) $(LFLAGS) -c UlrRequester.cpp -o UlrRequester.o
 
 Response.o: Response.cpp Response.hpp

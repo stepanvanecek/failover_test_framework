@@ -7,28 +7,22 @@
 #include "jsoncpp/json/json.h"
 #include <fstream>
 
-//#include "TestData.hpp"
 #include "UlrRequester.hpp"
 #include "ResponseScan.hpp"
 
 using namespace std;
 
-long int get_act_time_ms()
-{
-    struct timeval tp;
-    gettimeofday(&tp, NULL);
-    return tp.tv_sec * 1000 + tp.tv_usec / 1000;
-}
-
-
-
+int WriteOutputStructure(TestData * t);
 
 int main(int argc, const char * argv[])
 {
+    cout << "in main" << endl;
+    
+    
     Json::Value root;
     Json::Reader reader;
     cout << "argv[1] " << argv[1] << endl ;
-    ifstream test(argv[1], std::ifstream::binary);
+    ifstream test("copy-tmp_data.txt", std::ifstream::binary);
     bool parsingSuccessful = reader.parse( test, root, false );
     if ( !parsingSuccessful )
     {
@@ -36,20 +30,32 @@ int main(int argc, const char * argv[])
         exit(1);
     }
     
-    TestData * t = new TestData(&root, 5, 20);
+    cout << root << endl;
     
-    cout << t->url << endl;
+    cout << "--------------";
+    
+    
+    
+    
+    TestData * t;
+    if(argc >= 2)
+        t  = new TestData(argv);
+    else
+    {
+        exit(1);
+    }
     
     UrlRequester *r = new UrlRequester((void*)t);
-
     r->Run();
 
-    usleep(200000);
+    //usleep(200000);
 
     ResponseScan c(t);
     c.Run();
+    //usleep(30000000);
+    cout << endl << "failover len: " << t->result_failover_len_ms << endl;
     
-    cout << endl << "failover len: " << t->failover_len_ms << endl;
+    WriteOutputStructure(t);
     
     delete r;
     delete t;
@@ -58,6 +64,23 @@ int main(int argc, const char * argv[])
     
 }
 
+int WriteOutputStructure(TestData * t)
+{
+    Json::Value root;
+    root["id"] = t->c.id;
+    root["ts"] = t->c.ts;
+    root["downtime"] = t->result_failover_len_ms;
+    root["precision"] = t->result_failvoer_precision_ms;
+    root["vms"] = "";
+    root["notes"] = t->c.notes;
+    
+    Json::StyledStreamWriter writer;
+    cout << "writing;" << endl;
+    ofstream test1(t->c.out_file);
+    writer.write(test1,root);
+    
+    return 1;
+}
 
 
 //

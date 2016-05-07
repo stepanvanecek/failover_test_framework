@@ -41,7 +41,7 @@
 	},
 	"output" : 
 	{
-		"path" : "/myfile.json",
+		"path" : "myfile.json",
 		"mail" : "abc@de.fg"//optional
 	},
 	"failover_trigger" : "nova stop up1",//uses creds/env vars

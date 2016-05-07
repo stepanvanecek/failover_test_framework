@@ -8,18 +8,19 @@
 
 #include <unistd.h>
 #include <cmath>
-
+#include <pthread.h>
 #include "ResponseScan.hpp"
 
 
 ResponseScan::ResponseScan(TestData * t)
 {
+    this->t = t;
     this->responses = t->responses;
     this->terminate = &t->terminate;
     totalRequests = 0;
     pre_failover = true;
-    this->failover_len_ms = &t->failover_len_ms;
-    this->responses_list_mutex = t->responses_list_mutex;
+    //this->failover_len_ms = &t->failover_len_ms;
+    //this->responses_list_mutex = t->responses_list_mutex;
     
 }
 
@@ -27,8 +28,14 @@ int ResponseScan::Run()
 {
     while(!*terminate)
     {
+        usleep(100000);
+        
+//        pthread_mutex_lock(responses_list_mutex);
+//        if(distance(responses->begin(), responses->end()) != 0)
+//            cout << "---" << distance(responses->begin(), responses->end()) << endl;
 //        for (list<Response*>::iterator it=responses->begin(); it != responses->end(); ++it)
 //            std::cout << "list data: " << (*it)->time_sent << " - " << (*it)->ptr << " - " << ((*it)->received? "ok" : "failure");
+//        pthread_mutex_unlock(responses_list_mutex);
 
         GatherData();
         
@@ -56,6 +63,7 @@ int ResponseScan::Run()
         usleep(10);
         
     }
+    TriggerFailover();
     cout << "********triggering failover********" << endl;
     while(!*terminate)
     {
@@ -65,10 +73,18 @@ int ResponseScan::Run()
     return 0;
 }
 
+int ResponseScan::TriggerFailover()
+{
+    system(t->c.terminate_command.c_str());
+    return 1;
+}
+
 void ResponseScan::ResponsesPost()
 {
     ptr_first = next(responses->begin(), inside_buffer);
+    pthread_mutex_lock(t->responses_list_mutex);
     ptr_last = prev(responses->end());
+    pthread_mutex_unlock(t->responses_list_mutex);
     
     for (list<Response*>::iterator resp_it=ptr_first; resp_it != next(ptr_last); ++resp_it)
     {
@@ -123,8 +139,9 @@ void ResponseScan::ResponsesPost()
                     }
                     if(found)
                     {
-                        cout << "zero downtime" << endl;
                         * terminate = true;
+                        cout << "zero downtime" << endl;
+                        t->result_failover_len_ms = 0;
                         return;
                     }
                 }
@@ -172,7 +189,7 @@ void ResponseScan::ResponsesPost()
                         {
                             failover_finish = (*resp_it)->time_sent;
                             cout << "failover finish:" << failover_finish << endl;
-                            *failover_len_ms = (int)(failover_finish - failover_start);
+                            t->result_failover_len_ms = (int)(failover_finish - failover_start);
                         }
                     }
                 }
@@ -182,6 +199,7 @@ void ResponseScan::ResponsesPost()
             
             if(correct_responses_after_failover >= request_buffer_size)
             {
+                cout << "terminating" << endl;
                 * terminate = true;
                 return;
             }
@@ -211,10 +229,10 @@ int ResponseScan::GatherData(bool last)//implicit false
 {
     ptr_first = responses->begin();
 
-    pthread_mutex_lock(responses_list_mutex);
+    pthread_mutex_lock(t->responses_list_mutex);
     ptr_last = prev(responses->end());
     list<Response*>::iterator end = next(ptr_last);
-    pthread_mutex_unlock(responses_list_mutex);
+    pthread_mutex_unlock(t->responses_list_mutex);
     
     //cout << "The distance is: " << std::distance(ptr_first,next(ptr_last)) << '\n';
     for (list<Response*>::iterator resp_it=ptr_first; resp_it != end; ++resp_it)

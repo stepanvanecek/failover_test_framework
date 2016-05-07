@@ -13,34 +13,33 @@ import subprocess
 
 ### MAIN
 if __name__ == "__main__":
+    if len(sys.argv) > 3:
+        configFile = sys.argv[3]
+    else:
+        configFile = 'config.json'
 
-    # if len(sys.argv) > 2:
-    #     configFile = sys.argv[1]
-    # else:
-    #     configFile = 'config.json'
-    #
-    # try:
-    #     with open("../config_files/" + configFile) as json_data_file:
-    #         try:
-    #             configData = commentjson.load(json_data_file)
-    #         except ValueError:
-    #             print "wrong data format. should be json"
-    #             exit(1)
-    #         except commentjson.JSONLibraryException:
-    #             print "wrong data format. should be json"
-    #             exit(1)
-    # except IOError:
-    #     print "file not found/permission"
-    #     exit(1)
-    #
-    # configData['creds']['os_password'] = sys.argv[2]
-    #
-    # print "Checking JSON structure..."
-    # if check_config_structure(configData) == -1:
-    #     print "problem reading config file"
-    #     exit(1)
-    #
-    # configData['launch_time'] = datetime.datetime.now().strftime('%Y%m%d%H%M%S%f')
+    try:
+        with open("../config_files/" + configFile) as json_data_file:
+            try:
+                configData = commentjson.load(json_data_file)
+            except ValueError:
+                print "wrong data format. should be json"
+                exit(1)
+            except commentjson.JSONLibraryException:
+                print "wrong data format. should be json"
+                exit(1)
+    except IOError:
+        print "file not found/permission"
+        exit(1)
+
+    configData['creds']['os_password'] = sys.argv[1]
+
+    print "Checking JSON structure..."
+    if check_config_structure(configData) == -1:
+        print "problem reading config file"
+        exit(1)
+
+    configData['launch_time'] = datetime.datetime.now().strftime('%Y/%m/%d-%H:%M:%S')
     # print "Building the infrastructure..."
     # if build_infrastructure(configData) == -1:
     #     print "problem building the infrastructure"
@@ -59,11 +58,34 @@ if __name__ == "__main__":
     #     exit(1)
     # print " Request received."
     # print "---"
-    # with open('tmp.json', 'w') as outfile:
-    #     json.dump(configData, outfile)
-    # print "Testing availability of a service " + configData['test_url']['full_url']
+
+    configData['test_url']['full_url'] = "87.190.239.41" #TODO zakomentovat
+
+    file = configData['test_url']['full_url'] + "\n" \
+           + configData['failover_trigger'] + "\n" \
+           + configData['creds']['os_username'] + "\n" \
+           + configData['creds']['os_tenant_name'] + "\n" \
+           + configData['output']['path'] + "\n" \
+           + configData['id'] + "\n" \
+           + configData['launch_time'] + "\n" \
+           + configData['notes'] + "\n" \
+           + str(configData['precision_ms']) + "\n"
+
+    f = open(sys.argv[2], 'w')
+    f.write(file)
+
+    with open("copy-" + sys.argv[2], 'w') as outfile:
+        json.dump(configData, outfile)
+
+    print "Testing availability of a service " + configData['test_url']['full_url']
 
     exit(0) # OK
+
+    """    file = str(len(configData['test_url']['full_url'])) + ";" + configData['test_url']['full_url'] + ";\n" \
+        + str(len(configData['failover_trigger'])) + ";" + configData['failover_trigger'] + ";\n" \
+        + str(len(configData['creds']['os_username'])) + ";" + configData['creds']['os_username'] + ";\n" \
+        + str(len(configData['creds']['os_tenant_name'])) + ";" + configData['creds']['os_tenant_name'] + ";\n" \
+        + str(configData['precision_ms']) + ";\n" """
 """
     if not 'path' in configData['output']:
         configData['output']['path'] = "no"

@@ -46,6 +46,7 @@ public:
     ResponseScan(TestData * t);
     int Run();
 private:
+    TestData * t;
     //pre-failover variables
     list<Response*>::iterator ptr_first;
     list<Response*>::iterator ptr_last;
@@ -57,16 +58,19 @@ private:
     int totalRequests;
    // int primary_vms; jako results_pre.size()
     list<Response*> * responses;
-    pthread_mutex_t * responses_list_mutex;
+    //pthread_mutex_t * responses_list_mutex;
     
     map<const char *, ResponseData, cmp_str> results_pre;
+    
+    
+    int TriggerFailover();
     
     //post-failover variables
     bool incorrect_response_detected;
     int correct_responses_after_failover;
     long failover_start;
     long failover_finish;
-    int * failover_len_ms;
+//    int * failover_len_ms;
     void CountArraySize();
     void ResponsesPost();
     int request_buffer_size;
