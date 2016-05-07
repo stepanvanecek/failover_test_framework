@@ -75,7 +75,7 @@ int ResponseScan::Run()
 
 int ResponseScan::TriggerFailover()
 {
-    system(t->c.terminate_command.c_str());
+    system(t->terminate_command.c_str());
     return 1;
 }
 

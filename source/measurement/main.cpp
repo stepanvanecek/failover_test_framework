@@ -16,27 +16,6 @@ int WriteOutputStructure(TestData * t);
 
 int main(int argc, const char * argv[])
 {
-    cout << "in main" << endl;
-    
-    
-    Json::Value root;
-    Json::Reader reader;
-    cout << "argv[1] " << argv[1] << endl ;
-    ifstream test("copy-tmp_data.txt", std::ifstream::binary);
-    bool parsingSuccessful = reader.parse( test, root, false );
-    if ( !parsingSuccessful )
-    {
-        std::cout  << reader.getFormatedErrorMessages() << "\n";
-        exit(1);
-    }
-    
-    cout << root << endl;
-    
-    cout << "--------------";
-    
-    
-    
-    
     TestData * t;
     if(argc >= 2)
         t  = new TestData(argv);
@@ -53,13 +32,13 @@ int main(int argc, const char * argv[])
     ResponseScan c(t);
     c.Run();
     //usleep(30000000);
-    cout << endl << "failover len: " << t->result_failover_len_ms << endl;
+    cout << "failover len: " << t->result_failover_len_ms << endl;
     
     WriteOutputStructure(t);
-    
+    cout << "Deallocating the resources..." << endl;
     delete r;
     delete t;
-    
+    cout << "DONE." << endl;
     return 0;
     
 }
@@ -67,16 +46,17 @@ int main(int argc, const char * argv[])
 int WriteOutputStructure(TestData * t)
 {
     Json::Value root;
-    root["id"] = t->c.id;
-    root["ts"] = t->c.ts;
+    Json::Value * config = t->config;
+    root["id"] = (*config)["id"];
+    root["ts"] = (*config)["launch_time"];
     root["downtime"] = t->result_failover_len_ms;
     root["precision"] = t->result_failvoer_precision_ms;
-    root["vms"] = "";
-    root["notes"] = t->c.notes;
+    root["vms"] = (*config)["vms"];;
+    root["notes"] = (*config)["notes"];
     
     Json::StyledStreamWriter writer;
-    cout << "writing;" << endl;
-    ofstream test1(t->c.out_file);
+    cout << "Writing to output file..." << endl;
+    ofstream test1((*config)["output"]["path"].asString());
     writer.write(test1,root);
     
     return 1;

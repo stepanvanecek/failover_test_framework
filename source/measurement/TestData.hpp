@@ -26,20 +26,18 @@ using namespace std;
 //    string os_password;
 //    
 //};
-class ConfigData
-{
-public:
-    string terminate_command;
-    string os_username;
-    string os_tenant_name;
-    string out_file;
-    string id;
-    string notes;
-    string ts;
-    
-    
-    const char * os_password;
-};
+//class ConfigData
+//{
+//public:
+//    string os_username;
+//    string os_tenant_name;
+//    string out_file;
+//    string id;
+//    string notes;
+//    string ts;    
+//    
+//    const char * os_password;
+//};
 
 class TestData
 {
@@ -57,15 +55,20 @@ public:
     int result_failvoer_precision_ms;
     
     //config file data
-    ConfigData c;
+    //ConfigData c;
     string url;
-    
+    string terminate_command;
+    const char * os_password;
+
     int min_interval_ms;
+    
+    Json::Value * config;
     
 
 private:
     int TriggerFailover();
     int ParseInputFile(const char * argv);
+    int ParseInputJson(const char * argv);
 };
 
 #endif /* TestData_hpp */

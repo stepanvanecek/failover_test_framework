@@ -40,26 +40,30 @@ if __name__ == "__main__":
         exit(1)
 
     configData['launch_time'] = datetime.datetime.now().strftime('%Y/%m/%d-%H:%M:%S')
-    # print "Building the infrastructure..."
-    # if build_infrastructure(configData) == -1:
-    #     print "problem building the infrastructure"
-    #     exit(1)
-    #
-    # if wait_for_spawn(configData) == -1:
-    #     print "machines didn't spawn properly"
-    #     exit(1)
-    #
-    # raw_input("Press Enter once the HA installation is ready:")
-    #
-    # print "Sending test request to ensure the operability."
-    # if test_infrastructure(configData) == -1:
-    #     print "infrastructure not built properly"
-    #     #erase built VMs
-    #     exit(1)
-    # print " Request received."
-    # print "---"
+    print "Building the infrastructure..."
+    if build_infrastructure(configData) == -1:
+        print "problem building the infrastructure"
+        exit(1)
 
-    configData['test_url']['full_url'] = "87.190.239.41" #TODO zakomentovat
+    if wait_for_spawn(configData) == -1:
+        print "machines didn't spawn properly"
+        exit(1)
+
+    raw_input("Press Enter once the HA installation is ready:")
+
+    print "Sending test request to ensure the operability."
+    if test_infrastructure(configData) == -1:
+        print "infrastructure not built properly"
+        #erase built VMs
+        with open(sys.argv[2], 'w') as outfile:
+            json.dump(configData, outfile)
+        exit(1)
+    print " Request received."
+    print "---"
+
+    #configData['test_url']['full_url'] = "87.190.239.41" #TODO zakomentovat
+
+    configData['creds']['os_password'] = ""
 
     file = configData['test_url']['full_url'] + "\n" \
            + configData['failover_trigger'] + "\n" \
@@ -73,8 +77,9 @@ if __name__ == "__main__":
 
     f = open(sys.argv[2], 'w')
     f.write(file)
+    f.close()
 
-    with open("copy-" + sys.argv[2], 'w') as outfile:
+    with open( sys.argv[2], 'w') as outfile:
         json.dump(configData, outfile)
 
     print "Testing availability of a service " + configData['test_url']['full_url']

@@ -1,5 +1,6 @@
 import pycurl
 from StringIO import StringIO
+import time
 
 def create_request(configData):
 
@@ -49,6 +50,7 @@ def test_infrastructure(configData):
         c.perform()
     except pycurl.error:
         try:
+            time.sleep(5)
             print "second attempt to send request"
             c.perform()
         except pycurl.error:
