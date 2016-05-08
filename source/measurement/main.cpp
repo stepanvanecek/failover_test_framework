@@ -56,7 +56,7 @@ int WriteOutputStructure(TestData * t)
     
     Json::StyledStreamWriter writer;
     cout << "Writing to output file..." << endl;
-    ofstream test1((*config)["output"]["path"].asString());
+    ofstream test1((*config)["output"]["file"].asString());
     writer.write(test1,root);
     
     return 1;

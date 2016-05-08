@@ -19,8 +19,6 @@ ResponseScan::ResponseScan(TestData * t)
     this->terminate = &t->terminate;
     totalRequests = 0;
     pre_failover = true;
-    //this->failover_len_ms = &t->failover_len_ms;
-    //this->responses_list_mutex = t->responses_list_mutex;
     
 }
 
@@ -28,7 +26,7 @@ int ResponseScan::Run()
 {
     while(!*terminate)
     {
-        usleep(100000);
+        usleep(t->min_interval_ms*300);
         
 //        pthread_mutex_lock(responses_list_mutex);
 //        if(distance(responses->begin(), responses->end()) != 0)
@@ -51,24 +49,24 @@ int ResponseScan::Run()
 //        }
 //        cout << "----------------" << endl;
         
-        if(pre_failover && (totalRequests >= results_pre.size() * MIN_REQUESTS_PER_MACHINE) && totalRequests > 10)
+        if(totalRequests > 1000 || (pre_failover && (totalRequests >= results_pre.size() * MIN_REQUESTS_PER_MACHINE) && totalRequests > 10))
         {
             last_pre_failover = responses->end();
             GatherData(true);
             CountArraySize();
-            //TODO trigger the failover
             //TODO spocitat prumerne neuspechy, aby se potom mohly tolerovat
             break;
         }
-        usleep(10);
-        
     }
     TriggerFailover();
+    timeout_start = UrlRequester::get_act_time_ms();
     cout << "********triggering failover********" << endl;
     while(!*terminate)
     {
+        usleep(t->min_interval_ms*300);
+        if(UrlRequester::get_act_time_ms() - timeout_start > t->timeout)
+            *terminate = true;
         ResponsesPost();
-        usleep(100000);
     }
     return 0;
 }
@@ -188,7 +186,7 @@ void ResponseScan::ResponsesPost()
                         if(abs(correct_responses_after_failover - x.second.pre_failover_ratio/POSITIVE_REP) < 0.5 )
                         {
                             failover_finish = (*resp_it)->time_sent;
-                            cout << "failover finish:" << failover_finish << endl;
+                            cout << "to delete failover finish:" << failover_finish << endl;
                             t->result_failover_len_ms = (int)(failover_finish - failover_start);
                         }
                     }
@@ -199,6 +197,7 @@ void ResponseScan::ResponsesPost()
             
             if(correct_responses_after_failover >= request_buffer_size)
             {
+                cout << "Failover finished: " << failover_finish << endl;
                 cout << "terminating" << endl;
                 * terminate = true;
                 return;

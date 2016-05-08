@@ -28,11 +28,11 @@ public:
     UrlRequester(void * t);
     ~UrlRequester();
     int Run();
+    static long int get_act_time_ms();
 private:
     static void * t;
     
     static size_t write_callback_func(void *ptr, size_t size, size_t nmemb, Response *s);
-    static long int get_act_time_ms();
     static void * pull_one_url(void * url);
     static void * cons_func(void * i);
     

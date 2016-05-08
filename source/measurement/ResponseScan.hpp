@@ -66,6 +66,8 @@ private:
     int TriggerFailover();
     
     //post-failover variables
+    long timeout_start;
+    
     bool incorrect_response_detected;
     int correct_responses_after_failover;
     long failover_start;

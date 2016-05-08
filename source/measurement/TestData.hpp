@@ -59,7 +59,8 @@ public:
     string url;
     string terminate_command;
     const char * os_password;
-
+    
+    int timeout;
     int min_interval_ms;
     
     Json::Value * config;

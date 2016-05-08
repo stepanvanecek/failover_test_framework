@@ -79,6 +79,7 @@ if __name__ == "__main__":
     f.write(file)
     f.close()
 
+    #TODO zaridit, aby se vytvorilo vzdy i pri chybe
     with open( sys.argv[2], 'w') as outfile:
         json.dump(configData, outfile)
 

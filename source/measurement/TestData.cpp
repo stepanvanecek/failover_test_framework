@@ -27,11 +27,15 @@ int TestData::ParseInputJson(const char * tmp_file)
     
     //TODO try catch
     url = (*config)["test_url"]["full_url"].asString();
-    cout << "url: " << url << endl;
+    //cout << "url: " << url << endl;
     terminate_command = (*config)["failover_trigger"].asString();
-    cout << "term: " << terminate_command << endl;
-    cout << "url: " << url << endl;
+    //cout << "term: " << terminate_command << endl;
+    //cout << "url: " << url << endl;
     min_interval_ms = (*config)["precision_ms"].asInt();
+    if(config->isMember("timeout"))
+        timeout = (*config)["timeout"].asInt() * 1000;
+    else
+        timeout = 300000;
     
 //    c.os_username = root["creds"]["os_username"].asString();
 //    c.os_tenant_name = root["creds"]["os_tenant_name"].asString();

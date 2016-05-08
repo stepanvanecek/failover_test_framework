@@ -29,11 +29,6 @@ def create_request(configData):
         print "missing machine or website in testURL"
         return -1
 
-    configData['response'] = """#!/bin/bash
-echo "8b88abe6-fe60-43f9-96b2-623b8558117f"
-echo "$(date)"
-"""
-    #TODO response
     return 1
 
 
@@ -61,8 +56,9 @@ def test_infrastructure(configData):
 
     body = buffer.getvalue()
 
-    #TODO test
-    if buffer.getvalue() == configData['response']:
-        print "ja"
-        return 1
-    return 1 #TODO dodelat test req.
+    if 'incorrect_responses' in configData:
+        for ir in configData['incorrect_responses']:
+            if body == ir:
+                return -1
+
+    return 1
