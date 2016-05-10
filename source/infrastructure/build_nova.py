@@ -27,8 +27,6 @@ def wait_for_spawn(configData):
     return 1
 
 def nova_client(username, tenant_name, password, deploynemt):
-    # TODO test if client connects
-    # exceptions.Unauthorized
     try:
         return nvclient.Client(version='2',
                            username=username,

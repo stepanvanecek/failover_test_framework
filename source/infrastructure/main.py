@@ -19,17 +19,17 @@ if __name__ == "__main__":
         configFile = 'config.json'
 
     try:
-        with open("../config_files/" + configFile) as json_data_file:
+        with open("config_files/" + configFile) as json_data_file:
             try:
                 configData = commentjson.load(json_data_file)
             except ValueError:
-                print "wrong data format. should be json"
+                print "Wrong data format. Should be json."
                 exit(1)
             except commentjson.JSONLibraryException:
-                print "wrong data format. should be json"
+                print "Wrong data format. Should be json."
                 exit(1)
     except IOError:
-        print "file not found/permission"
+        print "File not found/permission was denied."
         exit(1)
 
     configData['creds']['os_password'] = sys.argv[1]
@@ -66,42 +66,10 @@ if __name__ == "__main__":
 
     configData['creds']['os_password'] = ""
 
-    # file = configData['test_url']['full_url'] + "\n" \
-    #        + configData['failover_trigger'] + "\n" \
-    #        + configData['creds']['os_username'] + "\n" \
-    #        + configData['creds']['os_tenant_name'] + "\n" \
-    #        + configData['output']['file'] + "\n" \
-    #        + configData['id'] + "\n" \
-    #        + configData['launch_time'] + "\n" \
-    #        + configData['notes'] + "\n" \
-    #        + str(configData['precision_ms']) + "\n"
-    #
-    # f = open(sys.argv[2], 'w')
-    # f.write(file)
-    # f.close()
-
     #TODO zaridit, aby se vytvorilo vzdy i pri chybe
     with open( sys.argv[2], 'w') as outfile:
         json.dump(configData, outfile)
 
     print "Testing availability of a service " + configData['test_url']['full_url']
 
-    exit(0) # OK
-
-    """    file = str(len(configData['test_url']['full_url'])) + ";" + configData['test_url']['full_url'] + ";\n" \
-        + str(len(configData['failover_trigger'])) + ";" + configData['failover_trigger'] + ";\n" \
-        + str(len(configData['creds']['os_username'])) + ";" + configData['creds']['os_username'] + ";\n" \
-        + str(len(configData['creds']['os_tenant_name'])) + ";" + configData['creds']['os_tenant_name'] + ";\n" \
-        + str(configData['precision_ms']) + ";\n" """
-"""
-    if not 'path' in configData['output']:
-        configData['output']['path'] = "no"
-    if not 'mail' in configData['output']:
-        configData['output']['mail'] = "no"
-    command = "./test_framework/test_framework/program.o " + configData['test_url']['full_url'] + " " + configData['output']['path'] + " " + configData['output']['mail']
-    print command
-    data = subprocess.call( command , shell=True)
-"""
-    #TODO remove infrastructure
-
- #       exit(1);
+    exit(10) # OK
