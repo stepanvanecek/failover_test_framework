@@ -47,6 +47,9 @@ def test_infrastructure(configData):
         try:
             time.sleep(5)
             print "second attempt to send request"
+            c = pycurl.Curl()
+            c.setopt(c.URL, configData['test_url']['full_url'])
+            c.setopt(c.WRITEDATA, buffer)
             c.perform()
         except pycurl.error:
             print "empty reply"

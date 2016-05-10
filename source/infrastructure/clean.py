@@ -1,6 +1,7 @@
 import json
 import sys
 from build_nova import nova_client
+from novaclient import exceptions
 
 ### MAIN
 if __name__ == "__main__":
@@ -22,5 +23,9 @@ if __name__ == "__main__":
                            tmpConfigData['creds']['os_tenant_name'], \
                            sys.argv[1], \
                            vm['deployment'])
-
-        nova.servers.delete(vm['id'])
+        try:
+            nova.servers.delete(vm['id'])
+        except exceptions.NotFound:
+            i = 1
+        except exceptions.Unauthorized:
+            exit(1)

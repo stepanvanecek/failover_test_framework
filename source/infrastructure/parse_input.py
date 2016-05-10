@@ -29,8 +29,8 @@ def check_req_data(config_data):
         print "The mandatory key 'output' is missing."
         exit(2)
     else:
-        if not "path" in config_data['output'] and not "mail" in config_data['output']:
-            print "Either 'path' or 'mail' must be filled in in 'output'."
+        if not "file" in config_data['output'] and not "mail" in config_data['output']:
+            print "Either 'file' or 'mail' must be filled in in 'output'."
             exit(2)
     if not "failover_trigger" in config_data:
         print "The mandatory key 'failover_trigger' is missing."

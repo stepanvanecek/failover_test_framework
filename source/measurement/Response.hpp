@@ -19,6 +19,7 @@ public:
     char *ptr;
     size_t len;
     long int time_sent;
+    long int time_received;
     bool received;
 };
 

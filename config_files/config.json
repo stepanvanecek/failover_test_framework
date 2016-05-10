@@ -1,57 +1,51 @@
 {
-	"id" : "test_run", //name of the rest
+	"id" : "corosync", //name of the rest
 	"vms" : //specification of the vms to be deployed
 	[
 		{
-			"name" : "lb",//
-			"image_id" : "6d12c3f5-918c-4cb2-a034-243b7c348ac7",//
-			"flavor" : 22,///
-			"deployment" : "dd2c",//
-			"keypair" : "sv-cah-dd2c",//
+			"name" : "primary",//
+			"image_id" : "df80d514-d27d-4dec-84d5-56210e70a29c",//
+			"flavor" : 21,///
+			"deployment" : "dd1a",//
+			"keypair" : "lenovo-keypair-cah",//
 			"floating_ip" : true//,
 			//"cloud_init" : "/path/to/script",//
-			//"additional_script" : "/path/to/script" //
+			,"cloud_init" : "/Users/stepan/thesis/failover_test_framework/scripts/cloud_init_apache.sh"//,//not mandatory??
+
+			,"additional_script" : "/path/to/script"
+			,"path_to_key" : "/Users/stepan/.ssh/sv-cah-dd2c.pem" //
 		},
 		{
-			"name" : "up1",
-			"image_id" : "909e3fe7-6e60-4496-8b88-35e02de54024",
+			"name" : "secondary",
+			"image_id" : "df80d514-d27d-4dec-84d5-56210e70a29c",
 			"flavor" : 21,
 			"deployment" : "dd1a",
 			"keypair" : "lenovo-keypair-cah",//not mandatory??
-			"floating_ip" : true//,not mandatory??
+			"floating_ip" : false//,not mandatory??
+			,"cloud_init" : "/Users/stepan/thesis/failover_test_framework/scripts/cloud_init_apache.sh"//,//not mandatory??
+
 			//"cloud_init" : "/path/to/script",//not mandatory??
 			//"additional_script" : "/path/to/script"//not mandatory??
-		},
-		{
-			"name" : "up2",
-			"image_id" : "6fa52f96-be97-4fd7-a963-1e08e9c689e5",
-			"flavor" : "cloudcompute.xs",
-			"keypair" : "lenovo-keypair-dd2a",
-			"deployment" : "dd2a",
-			"floating_ip" : true
-			//"cloud_init" : "/path/to/script",
-			//"additional_script" : "/path/to/script" 
-		}
+		}//"additional_script" : "/path/to/script" 
 	],
 	"test_url" : 
 	{
-		"machine" : "lb",
+		"machine" : "primary",
 		//"website" : "",
-		"path" : ""
+		"path" : "/test_failover"
 	},
 	"output" : 
 	{
-		"path" : "myfile.json",
-		"mail" : "abc@de.fg"//optional
+		"file" : "corysync1.json"
 	},
-	"failover_trigger" : "nova stop up1",//uses creds/env vars
+	"failover_trigger" : "nova stop primary",//uses creds/env vars
 	"creds" :
 	{
 		"os_username" : "stepan.vanecek@cloudandheat.com",
 		"os_tenant_name" : "cah-stepanvanecek"
 		
 	},
-	"precision_ms" : 10,
+	"precision_ms" : 20,
 	"timeout" : 300,
-	"notes" : "test run"
+	"notes" : "corosync w/pacemaker. two vms in one deployment with shared floating IP"
 }

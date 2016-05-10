@@ -104,7 +104,10 @@ void ResponseScan::ResponsesPost()
             {
                 incorrect_response_detected = true;
                 failover_start = (*resp_it)->time_sent;
-                cout << "failover start: " << failover_start << endl;
+                
+                startdiff = failover_start - (prev(*resp_it))->time_sent;
+                
+                cout << "failover start: " << failover_start << " precision: " << startdiff << endl;
                 correct_responses_after_failover = 0;
             }
             //5.3.2.4 initially scan everything
@@ -219,6 +222,7 @@ void ResponseScan::CountArraySize()
         if(x.second.pre_failover_ratio > request_buffer_size)
             request_buffer_size = x.second.pre_failover_ratio;
     }
+    cout << "buffer size: " << request_buffer_size << endl;
     inside_buffer = 0;
     
     return;

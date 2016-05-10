@@ -62,6 +62,8 @@ private:
     
     map<const char *, ResponseData, cmp_str> results_pre;
     
+    long startdiff;
+    
     
     int TriggerFailover();
     

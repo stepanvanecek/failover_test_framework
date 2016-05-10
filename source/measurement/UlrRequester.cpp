@@ -14,7 +14,8 @@
 
 #include "TestData.hpp"
 
-#define MIN_TIMEOUT 10000
+#define TIMEOUT 5000
+#define CONNECTTIMEOUT 2000
 #define MAX_THREADS 1000
 
 
@@ -27,7 +28,7 @@ void * UrlRequester::t;
 UrlRequester::UrlRequester(void * v)
 {
     t = v;
-    this->timeout = (((TestData *)t)->min_interval_ms * MAX_THREADS > MIN_TIMEOUT)? (long)(((TestData *)t)->min_interval_ms * MAX_THREADS): MIN_TIMEOUT;
+//    this->timeout = (((TestData *)t)->min_interval_ms * MAX_THREADS > MIN_TIMEOUT)? (long)(((TestData *)t)->min_interval_ms * MAX_THREADS): MIN_TIMEOUT;
 
     pthread_mutex_init(&req_mutex, NULL);
 
@@ -110,31 +111,27 @@ void * UrlRequester::pull_one_url(void * ptr)
     curl_easy_setopt(curl, CURLOPT_URL, ((TestData *)t)->url.c_str());
     curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_callback_func);
     curl_easy_setopt(curl, CURLOPT_WRITEDATA, r);
-    curl_easy_setopt(curl, CURLOPT_TIMEOUT_MS, timeout);
+    curl_easy_setopt(curl, CURLOPT_TIMEOUT_MS, TIMEOUT);
+    curl_easy_setopt(curl, CURLOPT_CONNECTTIMEOUT_MS, CONNECTTIMEOUT);
+    curl_easy_setopt(curl, CURLOPT_MAXCONNECTS, 50);
+    //curl_easy_setopt(curl, CURLOPT_FRESH_CONNECT, 1);
     
     CURLcode res = curl_easy_perform(curl);
+    r->time_received = get_act_time_ms();
     if(res != CURLE_OK)
     {
         r->received = false;
     }
-
+    
     curl_easy_cleanup(curl);
     
-    //printf ("--x-%ld-x--%s\n", r->time_sent, r->ptr);
+    printf ("--x-%ld--%ld---%ld--x--%s\n", r->time_sent/1000, r->time_received-r->time_sent, r->time_received/1000, r->ptr);
     pthread_mutex_lock(&responses_list_mutex);
     
     ((TestData *)t)->responses->push_back(r);
     pthread_mutex_unlock(&responses_list_mutex);
  
 // */
-//    printf ("--x-%ld-x--\n", get_act_time_ms());
-
-    //curl_easy_setopt(curl, CURLOPT_ACCEPTTIMEOUT_MS, 1000);
-    //curl_easy_setopt(curl, CURLOPT_CONNECTTIMEOUT_MS, 10000);
-    //    //curl_easy_setopt(CURL *handle, CURLOPT_LOW_SPEED_LIMIT, long speedlimit);
-    //    Pass a long as parameter. It contains the average transfer speed in bytes per second that the transfer should be below during CURLOPT_LOW_SPEED_TIME seconds for libcurl to consider it to be too slow and abort.
-    //        curl_easy_setopt(CURL *handle, CURLOPT_LOW_SPEED_TIME, long speedtime);
-    //    Pass a long as parameter. It contains the time in number seconds that the transfer speed should be below the CURLOPT_LOW_SPEED_LIMIT for the library to consider it too slow and abort.
 
     req_struct->active = false;
     return(NULL);

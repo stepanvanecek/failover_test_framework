@@ -2,6 +2,7 @@
 from novaclient import client as nvclient
 from novaclient import exceptions
 import time
+import subprocess
 
 authurl = "https://identity-<deployment_name>.cloudandheat.com:5000/v2.0"
 
@@ -28,12 +29,17 @@ def wait_for_spawn(configData):
 def nova_client(username, tenant_name, password, deploynemt):
     # TODO test if client connects
     # exceptions.Unauthorized
-    return nvclient.Client(version='2',
+    try:
+        return nvclient.Client(version='2',
                            username=username,
                            project_id=tenant_name,
                            api_key=password,
                            auth_url=authurl.replace('<deployment_name>', deploynemt),
                            insecure=False)
+    except exceptions.Unauthorized:
+        print "Authorisation failed. Check the credentials and password."
+        exit(1)
+
 
 def check_rule(protocol, from_port, to_port, nova, secgroup):
     have_rule = False
@@ -72,6 +78,9 @@ def launch_vms(configData):
             except ValueError:
                 print "Flavor '" + vm['flavor'] + "' not found."
                 exit(3)
+        except exceptions.Unauthorized:
+            print "Authorication failed. Check the credentials and password."
+            exit(1)
 
         image_id = vm['image_id']
 
@@ -105,17 +114,18 @@ def launch_vms(configData):
             print "Limit for the tenant reached."
             exit(4)
         except exceptions.BadRequest:
-            print "Spawning was unsuccessful."
+            print "Spawning was unsuccessful. Check the specified VMs."
             exit(4)
 
         vm['id'] = vm_data.id
+        vm['auth_url'] = authurl.replace('<deployment_name>', vm['deployment'])
 
     return 1
 
 def allocate_fip(configData):
 
     for vm in configData['vms']:
-        if "floating_ip" in vm:
+        if "floating_ip" in vm and vm['floating_ip'] == True:
             nova = nova_client(configData['creds']['os_username'], \
                                configData['creds']['os_tenant_name'], \
                                configData['creds']['os_password'], \
@@ -151,6 +161,19 @@ def reboot_vms(configData):
                            vm['deployment'])
         nova.servers.reboot(vm['id'])
 
+def run_scripts(configData):
+    #TODO
+    # for vm in configData['vms']:
+    #     if "additional_script" in vm and "path_to_key" in vm:
+    #     ssh = subprocess.Popen(["ssh", "%s" % HOST, COMMAND],
+    #                        ...
+    # shell = False,
+    #         ...
+    # stdout = subprocess.PIPE,
+    #          ...
+    # stderr = subprocess.PIPE)
+    return
+
 def build_infrastructure(configData):
     if launch_vms(configData) == -1:
         return -1
@@ -165,6 +188,10 @@ def build_infrastructure(configData):
 
     wait_for_spawn(configData)
 
+    run_scripts(configData)
+
     print " The infrastructure is ready."
+
+
 
     #TODO run additional scripts

@@ -40,6 +40,7 @@ if __name__ == "__main__":
         exit(1)
 
     configData['launch_time'] = datetime.datetime.now().strftime('%Y/%m/%d-%H:%M:%S')
+
     print "Building the infrastructure..."
     if build_infrastructure(configData) == -1:
         print "problem building the infrastructure"
@@ -65,19 +66,19 @@ if __name__ == "__main__":
 
     configData['creds']['os_password'] = ""
 
-    file = configData['test_url']['full_url'] + "\n" \
-           + configData['failover_trigger'] + "\n" \
-           + configData['creds']['os_username'] + "\n" \
-           + configData['creds']['os_tenant_name'] + "\n" \
-           + configData['output']['path'] + "\n" \
-           + configData['id'] + "\n" \
-           + configData['launch_time'] + "\n" \
-           + configData['notes'] + "\n" \
-           + str(configData['precision_ms']) + "\n"
-
-    f = open(sys.argv[2], 'w')
-    f.write(file)
-    f.close()
+    # file = configData['test_url']['full_url'] + "\n" \
+    #        + configData['failover_trigger'] + "\n" \
+    #        + configData['creds']['os_username'] + "\n" \
+    #        + configData['creds']['os_tenant_name'] + "\n" \
+    #        + configData['output']['file'] + "\n" \
+    #        + configData['id'] + "\n" \
+    #        + configData['launch_time'] + "\n" \
+    #        + configData['notes'] + "\n" \
+    #        + str(configData['precision_ms']) + "\n"
+    #
+    # f = open(sys.argv[2], 'w')
+    # f.write(file)
+    # f.close()
 
     #TODO zaridit, aby se vytvorilo vzdy i pri chybe
     with open( sys.argv[2], 'w') as outfile:
