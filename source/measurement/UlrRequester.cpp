@@ -172,10 +172,13 @@ void * UrlRequester::cons_func(void * ptr)
                 }
             }
             else
-                usleep(((TestData *)t)->min_interval_ms * 100);
+                usleep(((TestData *)t)->min_interval_ms * 128);
         }
         else
-            usleep(((TestData *)t)->min_interval_ms * 100);
+        {
+            if(thrIndex == MAX_THREADS -1)
+                usleep(((TestData *)t)->min_interval_ms * 128);
+        }
         
         if(thrIndex == MAX_THREADS - 1)
             thrIndex = 0;
