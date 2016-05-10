@@ -50,14 +50,12 @@ private:
     //pre-failover variables
     list<Response*>::iterator ptr_first;
     list<Response*>::iterator ptr_last;
-    list<Response*>::iterator last_pre_failover;
     
-    int GatherData(bool last = false);
-    bool pre_failover;
+    int GatherData();
     
     int totalRequests;
    // int primary_vms; jako results_pre.size()
-    list<Response*> * responses;
+    list<Response *> * responses;
     //pthread_mutex_t * responses_list_mutex;
     
     map<const char *, ResponseData, cmp_str> results_pre;
@@ -68,6 +66,7 @@ private:
     int TriggerFailover();
     
     //post-failover variables
+    list <Response *> request_buffer;
     long timeout_start;
     
     bool incorrect_response_detected;
@@ -78,7 +77,7 @@ private:
     void CountArraySize();
     void ResponsesPost();
     int request_buffer_size;
-    list <Response *> request_buffer;
+    
     int inside_buffer;
     
     bool * terminate;

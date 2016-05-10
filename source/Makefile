@@ -8,7 +8,7 @@ OBJS = $(SOURCE_DIR)/main.o $(SOURCE_DIR)/jsoncpp.o $(SOURCE_DIR)/UlrRequester.o
 all: compile
 
 run:
-	time $(SOURCE_DIR)/program.o tmp_data.json
+	time $(SOURCE_DIR)/program.o password_1234 tmp_data.json config.json
 
 compile: $(OBJS)
 	$(CC) $(LFLAGS) $(OBJS) -o $(SOURCE_DIR)/program.o

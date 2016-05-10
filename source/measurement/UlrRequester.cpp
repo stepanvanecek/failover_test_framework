@@ -94,9 +94,7 @@ void * UrlRequester::pull_one_url(void * ptr)
     Response * r = new Response();
     r->ptr = c;
     r->time_sent = get_act_time_ms();
-    
     printf ("--x-%ld-x--%s\n", r->time_sent, r->ptr);
-    
     pthread_mutex_lock(&responses_list_mutex);
     ((TestData *)t)->responses->push_back(r);
     pthread_mutex_unlock(&responses_list_mutex);
@@ -106,6 +104,10 @@ void * UrlRequester::pull_one_url(void * ptr)
     CURL * curl;
     curl = curl_easy_init();
     r->time_sent = get_act_time_ms();
+    
+    pthread_mutex_lock(&responses_list_mutex);
+    ((TestData *)t)->responses->push_back(r);
+    pthread_mutex_unlock(&responses_list_mutex);
 
     //cout << "url being sent: " << ((TestData *)t)->url << " at time: " << r->time_sent << endl;
     curl_easy_setopt(curl, CURLOPT_URL, ((TestData *)t)->url.c_str());
@@ -117,7 +119,7 @@ void * UrlRequester::pull_one_url(void * ptr)
     //curl_easy_setopt(curl, CURLOPT_FRESH_CONNECT, 1);
     
     CURLcode res = curl_easy_perform(curl);
-    r->time_received = get_act_time_ms();
+    r->time_received = get_act_time_ms();//TODO thread-unsafe?
     if(res != CURLE_OK)
     {
         r->received = false;
@@ -125,11 +127,7 @@ void * UrlRequester::pull_one_url(void * ptr)
     
     curl_easy_cleanup(curl);
     
-    printf ("--x-%ld--%ld---%ld--x--%s\n", r->time_sent/1000, r->time_received-r->time_sent, r->time_received/1000, r->ptr);
-    pthread_mutex_lock(&responses_list_mutex);
-    
-    ((TestData *)t)->responses->push_back(r);
-    pthread_mutex_unlock(&responses_list_mutex);
+    printf ("--x-%ld--%ld---%ld--x--%s\n", r->time_sent, r->time_received-r->time_sent, r->time_received, r->ptr);
  
 // */
 

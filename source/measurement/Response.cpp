@@ -19,6 +19,7 @@ Response::Response()
     }
     this->ptr[0] = '\0';
     this->received = true;
+    this->time_received = -1;
 }
 
 Response::~Response()
