@@ -13,13 +13,14 @@ import subprocess
 
 ### MAIN
 if __name__ == "__main__":
-    if len(sys.argv) > 3:
-        configFile = sys.argv[3]
+    if len(sys.argv) > 4:
+        configFile = sys.argv[4]
     else:
-        configFile = 'config.json'
+        print "No config file specified. Using 'config_example.json'"
+        configFile = 'config_example.json'
 
     try:
-        with open("config_files/" + configFile) as json_data_file:
+        with open(sys.argv[3] + "/config_files/" + configFile) as json_data_file:
             try:
                 configData = commentjson.load(json_data_file)
             except ValueError:
@@ -33,6 +34,7 @@ if __name__ == "__main__":
         exit(1)
 
     configData['creds']['os_password'] = sys.argv[1]
+    configData['framework_dir'] = sys.argv[3]
 
     print "Checking JSON structure..."
     if check_config_structure(configData) == -1:
@@ -54,8 +56,9 @@ if __name__ == "__main__":
 
     print "Sending test request to ensure the operability."
     if test_infrastructure(configData) == -1:
-        print "infrastructure not built properly"
+        print "Infrastructure not built properly"
         #erase built VMs
+        configData['creds']['os_password'] = ""
         with open(sys.argv[2], 'w') as outfile:
             json.dump(configData, outfile)
         exit(1)
@@ -66,7 +69,7 @@ if __name__ == "__main__":
 
     configData['creds']['os_password'] = ""
 
-    #TODO zaridit, aby se vytvorilo vzdy i pri chybe
+    #TODO perform always, even after an exception
     with open( sys.argv[2], 'w') as outfile:
         json.dump(configData, outfile)
 

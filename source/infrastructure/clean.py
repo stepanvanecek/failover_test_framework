@@ -14,7 +14,7 @@ if __name__ == "__main__":
                 print "wrong data format. should be json"
                 exit(1)
     except IOError:
-        print "file not found/permission"
+        #print "file not found/permission"
         exit(1)
 
     for vm in tmpConfigData['vms']:
