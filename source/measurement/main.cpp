@@ -12,7 +12,7 @@
 
 using namespace std;
 
-int WriteOutputStructure(TestData * t);
+int WriteOutputStructure(TestData * t, const char *);
 
 int main(int argc, const char * argv[])
 {
@@ -34,7 +34,7 @@ int main(int argc, const char * argv[])
     //usleep(30000000);
     cout << "failover len: " << t->result_failover_len_ms << endl;
     
-    WriteOutputStructure(t);
+    WriteOutputStructure(t, argv[3]);
     cout << "Deallocating the resources..." << endl;
     delete r;
     delete t;
@@ -43,7 +43,7 @@ int main(int argc, const char * argv[])
     
 }
 
-int WriteOutputStructure(TestData * t)
+int WriteOutputStructure(TestData * t, const char * frameworkPath)
 {
     Json::Value root;
     Json::Value * config = t->config;
@@ -55,8 +55,10 @@ int WriteOutputStructure(TestData * t)
     root["notes"] = (*config)["notes"];
     
     Json::StyledStreamWriter writer;
+    string path = frameworkPath;
+    path += "/results/" + (*config)["output"]["file"].asString();
     cout << "Writing to output file " << (*config)["output"]["file"].asString() << endl;
-    ofstream test1((*config)["output"]["file"].asString());
+    ofstream test1(path);
     writer.write(test1,root);
     
     return 1;

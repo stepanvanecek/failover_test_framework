@@ -20,56 +20,34 @@
 
 using namespace std;
 
-//class ConfigData
-//{
-//public:
-//    string os_password;
-//    
-//};
-//class ConfigData
-//{
-//public:
-//    string os_username;
-//    string os_tenant_name;
-//    string out_file;
-//    string id;
-//    string notes;
-//    string ts;    
-//    
-//    const char * os_password;
-//};
-
 class TestData
 {
 public:
     TestData(const char ** url);
     TestData(const char * url, int min_interval_ms);
-    //TestData(Json::Value root, int min_interval_ms);
     ~TestData();
-    bool terminate;
+    
     list<Response *> * responses;
     
-    pthread_mutex_t * responses_list_mutex;
+    bool terminate;
+    int timeout;
+    bool timeout_reached;
     
-    int result_failover_len_ms;
-    int result_failvoer_precision_ms;
-    
-    //config file data
-    //ConfigData c;
+    int min_interval_ms;
     string url;
     string terminate_command;
     const char * os_password;
     
-    int timeout;
-    int min_interval_ms;
+    int result_failover_len_ms;
+    int result_failvoer_precision_ms;
     
     Json::Value * config;
     
-
+    pthread_mutex_t * responses_list_mutex;
 private:
     int TriggerFailover();
     int ParseInputFile(const char * argv);
-    int ParseInputJson(const char * argv);
+    int ParseInputJson(string argv);
 };
 
 #endif /* TestData_hpp */

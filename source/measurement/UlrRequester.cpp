@@ -13,6 +13,8 @@
 #include <pthread.h>
 
 #include "TestData.hpp"
+#include "jsoncpp/json/json-forwards.h"
+#include "jsoncpp/json/json.h"
 
 #define TIMEOUT 5000
 #define CONNECTTIMEOUT 2000
@@ -91,16 +93,6 @@ size_t UrlRequester::write_callback_func(void *ptr, size_t size, size_t nmemb, R
 void * UrlRequester::pull_one_url(void * ptr)
 {
     Request_thr * req_struct = (Request_thr *)ptr;
-/*
-    char * c = (char *)malloc(sizeof(char *)*10);
-    Response * r = new Response();
-    r->ptr = c;
-    r->time_sent = get_act_time_ms();
-    printf ("--x-%ld-x--%s\n", r->time_sent, r->ptr);
-    pthread_mutex_lock(&responses_list_mutex);
-    ((TestData *)t)->responses->push_back(r);
-    pthread_mutex_unlock(&responses_list_mutex);
-/*////*
  
     Response * r = new Response();
     CURL * curl;
@@ -118,25 +110,37 @@ void * UrlRequester::pull_one_url(void * ptr)
     curl_easy_setopt(curl, CURLOPT_TIMEOUT_MS, TIMEOUT);
     curl_easy_setopt(curl, CURLOPT_CONNECTTIMEOUT_MS, CONNECTTIMEOUT);
     curl_easy_setopt(curl, CURLOPT_MAXCONNECTS, 50);
+    long http_code = 0;
+    curl_easy_getinfo (curl, CURLINFO_RESPONSE_CODE, &http_code);
     //curl_easy_setopt(curl, CURLOPT_FRESH_CONNECT, 1);
     
+    r->time_sent = get_act_time_ms();
     CURLcode res = curl_easy_perform(curl);
     r->time_received = get_act_time_ms();//TODO thread-unsafe?
-    if(res != CURLE_OK || strcmp(r->ptr,"") == 0)
+    if(res != CURLE_OK || strcmp(r->ptr,"") == 0 || http_code >= 400)
     {
         r->received = false;
-        printf ("--x-%ld--%ld---%ld--x--%s   false\n", r->time_sent, r->time_received-r->time_sent, r->time_received, r->ptr);
+        //printf ("--x-%ld--%ld---%ld--x--%s   false\n", r->time_sent, r->time_received-r->time_sent, r->time_received, r->ptr);
     }
     else
     {
-        printf ("--x-%ld--%ld---%ld--x--%s\n", r->time_sent, r->time_received-r->time_sent, r->time_received, r->ptr);
+        //printf ("--x-%ld--%ld---%ld--x--%s\n", r->time_sent, r->time_received-r->time_sent, r->time_received, r->ptr);
+//        cout << "abcd";
+//        Json::Value v = ((TestData*)(t))->config;
+//        cout << "asdf";
+//        if (v.isMember("incorrect_responses"))
+//        {
+//            for (auto itr : v["incorrect_responses"])
+//            {
+//                string resp = itr.asString();
+//                if(strcmp(r->ptr,resp.c_str()) == 0)
+//                    r->received = false;
+//            }
+//        }
+//        cout << "ppppp" << endl;
     }
     
     curl_easy_cleanup(curl);
-    
-    
- 
-// */
 
     req_struct->active = false;
     return(NULL);

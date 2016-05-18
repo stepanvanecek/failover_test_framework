@@ -100,7 +100,6 @@ void ResponseScan::ResponsesPost()
 
         if(!incorrect_response_detected)
         {
-            //cout << "hele35" << endl;
             //if incorrect response is deteced. Covers 5.3.2.1, 5.3.2.2, 5.3.2.3
             if(!(resp_begin_ptr)->received && (resp_begin_ptr)->time_sent >= timeout_start)
             {
@@ -119,19 +118,13 @@ void ResponseScan::ResponsesPost()
                 {
                     x.second.post_checked = false;
                 }
-                //cout << "hele353" << endl;
                 for (list<Response*>::iterator x=request_buffer.begin(); x != request_buffer.end(); ++x)
                 {
-                    if(distance(request_buffer.begin(), x) <= (*results_pre.find((*x)->ptr)).second.pre_failover_ratio)//TODO overit, jestli nedelim 3!!!
+                    if(distance(request_buffer.begin(), x) <= (*results_pre.find((*x)->ptr)).second.pre_failover_ratio)//TODO
                     {
                         (*results_pre.find((*x)->ptr)).second.post_checked = true;
                     }
-                    /*old
-                     if(distance(request_buffer.begin(), x) <= (*results_pre.find((*x)->ptr)).second.pre_failover_ratio)
-                     (*results_pre.find((*x)->ptr)).second.post_checked = true;
-                     */
                 }
-                //cout << "hele353x     ";
                 for (auto & x : results_pre)
                 {
                     bool found = false;
@@ -151,13 +144,12 @@ void ResponseScan::ResponsesPost()
                         return;
                     }
                 }
-                //cout << "hele353x-" << endl;
             }
         }
         
         if(incorrect_response_detected)
         {
-            cout << "hele34 - " << resp_begin_ptr->received << " - " << resp_begin_ptr->time_sent << endl;
+            //cout << "point1 - " << resp_begin_ptr->received << " - " << resp_begin_ptr->time_sent << endl;
             for (auto & x : results_pre)
             {
                 x.second.post_checked = false;
@@ -177,7 +169,6 @@ void ResponseScan::ResponsesPost()
             {
                 if(!x.second.post_checked)
                 {
-                    //x.first je jmeno masiny ve failoveru
                     x.second.is_set_in_downtime = true;
                     //cout << "DOWNTIME: " << x.first << endl;
                 }
@@ -245,34 +236,12 @@ void ResponseScan::CountArraySize()
     return;
 }
 
-int ResponseScan::GatherData()//implicit false
+int ResponseScan::GatherData()
 {
     list<Response*>::iterator resp_it;
 
     while(!t->terminate)
     {
-        
-        //        pthread_mutex_lock(responses_list_mutex);
-        //        if(distance(responses->begin(), responses->end()) != 0)
-        //            cout << "---" << distance(responses->begin(), responses->end()) << endl;
-        //        for (list<Response*>::iterator it=responses->begin(); it != responses->end(); ++it)
-        //            std::cout << "list data: " << (*it)->time_sent << " - " << (*it)->ptr << " - " << ((*it)->received? "ok" : "failure");
-        //        pthread_mutex_unlock(responses_list_mutex);
-        
-        
-        //        cout << "----------------" << totalRequests<< endl;
-        //        for( auto & x : results_pre)
-        //        {
-        //            cout << x.second.times.size() << " " << x.first <<  ": ";
-        //            for (auto & y : x.second.times)
-        //            {
-        //                cout << y << "   ";
-        //            }
-        //            cout << endl;
-        //        }
-        //        cout << "----------------" << endl;
-        
-        
         while(true) //no further request sent - the last one was already processed
         {
             pthread_mutex_lock(t->responses_list_mutex);
@@ -285,8 +254,6 @@ int ResponseScan::GatherData()//implicit false
             
             usleep(t->min_interval_ms * 1024);
         }
-        //cout << "resp_pre" << endl;
-        
         resp_it = responses->begin();
         
         while((*resp_it)->time_received == -1) //not received - wait until it is received
@@ -296,7 +263,7 @@ int ResponseScan::GatherData()//implicit false
         
         if(!(*resp_it)->received)
         {
-            //TODO chyba kdyz nema byt
+            //TODO should not happen
         }
         else
         {
