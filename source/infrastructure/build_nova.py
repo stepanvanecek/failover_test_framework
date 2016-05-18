@@ -17,7 +17,7 @@ def wait_for_spawn(configData):
         attempts = 0
         while True:
             vm_data = nova.servers.get(vm['id'])
-            if attempts > 50:
+            if attempts > 60:
                 print "VM " + vm['id'] +" is unable to start."
                 exit(4)
             if vm_data.status == 'ACTIVE':
@@ -95,10 +95,24 @@ def launch_vms(configData):
 
         #cloud-init script
         if "cloud_init" in vm: # TODO test cloud init souboru v parse_input
-            with open(vm['cloud_init']) as udata:
-                userdata_script = udata.read()
+            if vm['cloud_init'].startswith('/'):
+                try:
+                    with open(vm['cloud_init']) as udata:
+                        userdata_script = udata.read()
+                except IOError:
+                    print "Userdata script " + vm['cloud_init'] + " was not found."
+                    exit(1)
+            else:
+                try:
+                    with open(configData['framework_dir'] + '/' + vm['cloud_init']) as udata:
+                        userdata_script = udata.read()
+                except IOError:
+                    print "Userdata script " + vm['cloud_init'] + " was not found."
+                    exit(1)
         else:
             userdata_script = ""
+
+        #print "------" + userdata_script + "------"
 
         try:
             vm_data = nova.servers.create(name=vm['vm_name'],
@@ -114,6 +128,9 @@ def launch_vms(configData):
         except exceptions.BadRequest:
             print "Spawning was unsuccessful. Check the specified VMs."
             exit(4)
+        except exceptions.ClientException:
+            print "Error of the server"
+            exit(4)
 
         vm['id'] = vm_data.id
         vm['auth_url'] = authurl.replace('<deployment_name>', vm['deployment'])
@@ -123,32 +140,44 @@ def launch_vms(configData):
 def allocate_fip(configData):
 
     for vm in configData['vms']:
-        if "floating_ip" in vm and vm['floating_ip'] == True:
-            nova = nova_client(configData['creds']['os_username'], \
-                               configData['creds']['os_tenant_name'], \
-                               configData['creds']['os_password'], \
-                               vm['deployment'])
+        if "floating_ip" in vm:
+            if vm['floating_ip'] == True:
+                nova = nova_client(configData['creds']['os_username'], \
+                                   configData['creds']['os_tenant_name'], \
+                                   configData['creds']['os_password'], \
+                                   vm['deployment'])
 
-            floating_ip = ""
-            for fip in nova.floating_ips.list():
-                if not fip.instance_id:
-                    floating_ip = fip.ip
-                    break
+                floating_ip = ""
+                for fip in nova.floating_ips.list():
+                    if not fip.instance_id:
+                        floating_ip = fip.ip
+                        break
 
-            if not floating_ip:
+                if not floating_ip:
+                    try:
+                        floating_ip = nova.floating_ips.create()
+                    except exceptions.NotFound:
+                        print "VM " + vm['id'] + " is unable to allocate a floating ip."
+                        exit(4)
+
+
+                vm['floating_ip_addr'] = floating_ip
                 try:
-                    floating_ip = nova.floating_ips.create()
-                except exceptions.NotFound:
-                    print "VM " + vm['id'] + " is unable to allocate a floating ip."
+                    nova.servers.add_floating_ip(vm['id'], floating_ip)
+                except exceptions.BadRequest:
+                    print "VM " + vm['id'] + " is unable to associate a floating ip."
+                    exit(4)
+            elif not vm['floating_ip'] == False:
+                nova = nova_client(configData['creds']['os_username'], \
+                                   configData['creds']['os_tenant_name'], \
+                                   configData['creds']['os_password'], \
+                                   vm['deployment'])
+                try:
+                    nova.servers.add_floating_ip(vm['id'], vm['floating_ip'])
+                except exceptions.BadRequest:
+                    print "VM " + vm['id'] + " is unable to associate a floating ip."
                     exit(4)
 
-
-            vm['floating_ip_addr'] = floating_ip
-            try:
-                nova.servers.add_floating_ip(vm['id'], floating_ip)
-            except exceptions.BadRequest:
-                print "VM " + vm['id'] + " is unable to associate a floating ip."
-                exit(4)
     return 1
 
 def reboot_vms(configData):
@@ -168,12 +197,15 @@ def build_infrastructure(configData):
     wait_for_spawn(configData)
     print " VMs launched."
 
+    #time.sleep(10)
+
     if allocate_fip(configData) == -1:
         return -1
+
+    #time.sleep(10)
 
     reboot_vms(configData)
 
     wait_for_spawn(configData)
-
 
     print " The infrastructure is ready."
