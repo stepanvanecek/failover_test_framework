@@ -3,7 +3,8 @@ from novaclient import client as nvclient
 from novaclient import exceptions
 import time
 import subprocess
-
+import logging
+logging.captureWarnings(True)
 authurl = "https://identity-<deployment_name>.cloudandheat.com:5000/v2.0"
 
 

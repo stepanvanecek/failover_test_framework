@@ -8,6 +8,7 @@ OBJS = $(SOURCE_DIR)/main.o $(SOURCE_DIR)/jsoncpp.o $(SOURCE_DIR)/UlrRequester.o
 all: compile
 
 install:
+	apt-get install curl
 	apt-get install python-dev
 	apt-get install libcurl4-openssl-dev
 	pip install pycurl

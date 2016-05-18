@@ -16,8 +16,6 @@ git clone https://github.com/stepanvanecek/failover_test_framework.git
 
 It is assumed that you have downloaded the following in order to complete the installation and run the measurement:
 
-- libcurl. If not, see the [download link](https://curl.haxx.se/download.html) and follow the [installation guide](https://curl.haxx.se/docs/install.html).
-
 - python 2.7. You need python 2.7.9 or later. [link](https://www.python.org/downloads/)
 
 - python pip. [link](https://pypi.python.org/pypi/pip)
@@ -33,7 +31,7 @@ sudo make install
 
 to install the necessary packages.
 
-You can do so manually as well by istalling `pycurl`, `commentjson` and `python-novaclient` manually. Amalgated source of [jsoncpp](http://jsoncpp.sourceforge.net/) is already included in the source code.
+You can do so manually as well by istalling `libcurl`, `pycurl`, `commentjson` and `python-novaclient` manually. Amalgated source of [jsoncpp](http://jsoncpp.sourceforge.net/) is already included in the source code.
 
 ####Compile the soure code
 
