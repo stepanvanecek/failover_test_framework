@@ -1,6 +1,7 @@
 Test framework for cloud failover mechanisms
 ============================================
 
+The frmework is used to evaluate the temporal behavior of various failover approaches in the infrastructure of Cloud & Heat.
 
 Installation
 ------------
