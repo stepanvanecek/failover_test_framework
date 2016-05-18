@@ -1,7 +1,7 @@
 Test framework for cloud failover mechanisms
 ============================================
 
-The frmework is used to evaluate the temporal behavior of various failover approaches in the infrastructure of Cloud & Heat.
+The framework is used to evaluate the temporal behavior of various failover approaches in the infrastructure of Cloud & Heat.
 
 Installation
 ------------
@@ -24,12 +24,16 @@ It is assumed that you have downloaded the following in order to complete the in
 
 ####Download the libraries
 
+Run
+
 ``` {.sourceCode .bash}
 cd source
 sudo make install
 ``` 
 
 to install the necessary packages.
+
+You can do so manually as well by istalling `pycurl`, `commentjson` and `python-novaclient` manually. Amalgated source of [jsoncpp](http://jsoncpp.sourceforge.net/) is already included in the source code.
 
 ####Compile the soure code
 
@@ -79,10 +83,11 @@ The configuration file is a JSON file enabling comments (//). It has a defined s
 	* os_tenant_name
 * precision_ms - minimal/desired gap between the requests in milliseconds
 o timeout - timeout in seconds, 300 s if not set
-o notes - notes further describing the 
+o incorrect_responses - array with content that is considered wrong
+o notes - notes further describing the
 ~~~
 
-See the example configuration file in config_files/config_example.
+See an example configuration file in 'config_files/config_example.json'.
 
 #### Workflow
 
@@ -105,19 +110,19 @@ Output file
  The output file contains the values measured in the text and the specification. It contaains:
 
 ~~~
- - downtime - the downtime length in millieconds
- - id - the ID of the test as specified in the config. file
- - notes - notes taken to describe the test in the configuration file
- - precision - precision of the measurement in milliseconds
- - ts - time stamp of the test
- - vms - the array with specification of the VMs
- 	- auth_url - the openstack authentication URL of the deployment
- 	- deployment
- 	- flavor
- 	- floating_ip - indicator if the floaring IP was associated
- 	- floating_ip_addr - floating IP address associated to the VM
- 	- id - id of the VM
- 	- image_id - ID of the image
- 	- keypair
- 	- name
+* downtime - the downtime length in millieconds
+* id - the ID of the test as specified in the config. file
+*notes - notes taken to describe the test in the configuration file
+* precision - precision of the measurement in milliseconds
+* ts - time stamp of the test
+* vms - the array with specification of the VMs
+ 	* auth_url - the openstack authentication URL of the deployment
+ 	* deployment
+ 	* flavor
+ 	* floating_ip - indicator if the floaring IP was associated
+ 	* floating_ip_addr - floating IP address associated to the VM
+ 	* id - id of the VM
+ 	* image_id - ID of the image
+ 	* keypair
+ 	* name
 ~~~
