@@ -16,8 +16,19 @@ ResponseScan::ResponseScan(TestData * t)
 {
     this->t = t;
     this->responses = t->responses;
-    this->terminate = &t->terminate;
     totalRequests = 0;
+}
+
+ResponseScan::~ResponseScan()
+{
+    for (auto & x : results_pre)
+    {
+        delete x.first;
+    }
+    for (auto & x : request_buffer)
+    {
+        delete x;
+    }
 }
 
 int ResponseScan::Run()
@@ -31,7 +42,7 @@ int ResponseScan::Run()
     
     timeout_start = UrlRequester::get_act_time_ms();
     
-    cout << "********triggering failover********" << endl;
+    cout << "********triggering failover********" << timeout_start << endl;
     
     ResponsesPost();
     
@@ -46,12 +57,13 @@ int ResponseScan::TriggerFailover()
 
 void ResponseScan::ResponsesPost()
 {
-    list<Response*>::iterator resp_it;
+    Response* resp_begin_ptr;
     long last_time_sent = 0;
-    
-    while(!*terminate)
-    {
 
+    
+    while(!t->terminate)
+    {
+        Response* to_delete;
         while(true) //no further request sent - the last one was already processed
         {
             pthread_mutex_lock(t->responses_list_mutex);
@@ -65,19 +77,20 @@ void ResponseScan::ResponsesPost()
             usleep(t->min_interval_ms * 1024);
         }
         
-        resp_it = responses->begin();
+        resp_begin_ptr = *responses->begin();
         
-        while((*resp_it)->time_received == -1) //not received - wait until it is received
+        while((resp_begin_ptr)->time_received == -1) //not received - wait until it is received
         {
             usleep(t->min_interval_ms * 1024);
         }
         
         //the response is already received - either good or bad
-        request_buffer.push_back(*resp_it);
+        request_buffer.push_back(resp_begin_ptr);
 
         if(inside_buffer == request_buffer_size)
         {
-            delete(*request_buffer.begin());
+            to_delete = *request_buffer.begin();
+            delete to_delete;
             request_buffer.pop_front();
         }
         else
@@ -87,12 +100,12 @@ void ResponseScan::ResponsesPost()
 
         if(!incorrect_response_detected)
         {
+            //cout << "hele35" << endl;
             //if incorrect response is deteced. Covers 5.3.2.1, 5.3.2.2, 5.3.2.3
-            if(!(*resp_it)->received)
+            if(!(resp_begin_ptr)->received && (resp_begin_ptr)->time_sent >= timeout_start)
             {
-                
                 incorrect_response_detected = true;
-                failover_start = (*resp_it)->time_sent;
+                failover_start = resp_begin_ptr->time_sent;
                 
                 startdiff = failover_start - last_time_sent;
                 
@@ -106,7 +119,7 @@ void ResponseScan::ResponsesPost()
                 {
                     x.second.post_checked = false;
                 }
-                cout << "hele353" << endl;
+                //cout << "hele353" << endl;
                 for (list<Response*>::iterator x=request_buffer.begin(); x != request_buffer.end(); ++x)
                 {
                     if(distance(request_buffer.begin(), x) <= (*results_pre.find((*x)->ptr)).second.pre_failover_ratio)//TODO overit, jestli nedelim 3!!!
@@ -118,6 +131,7 @@ void ResponseScan::ResponsesPost()
                      (*results_pre.find((*x)->ptr)).second.post_checked = true;
                      */
                 }
+                //cout << "hele353x     ";
                 for (auto & x : results_pre)
                 {
                     bool found = false;
@@ -130,18 +144,20 @@ void ResponseScan::ResponsesPost()
                     }
                     if(found)
                     {
-                        * terminate = true;
+                        t->terminate = true;
                         cout << "zero downtime" << endl;
                         t->result_failover_len_ms = 0;
+                        t->result_failvoer_precision_ms = (int)((resp_begin_ptr->time_sent - last_time_sent)*results_pre.size()/2);
                         return;
                     }
                 }
+                //cout << "hele353x-" << endl;
             }
         }
         
         if(incorrect_response_detected)
         {
-            cout << "hele34" << endl;
+            cout << "hele34 - " << resp_begin_ptr->received << " - " << resp_begin_ptr->time_sent << endl;
             for (auto & x : results_pre)
             {
                 x.second.post_checked = false;
@@ -166,11 +182,11 @@ void ResponseScan::ResponsesPost()
                     //cout << "DOWNTIME: " << x.first << endl;
                 }
             }
-            if((*resp_it)->received)
+            if(resp_begin_ptr->received)
             {
                 correct_responses_after_failover ++;
                 if(correct_responses_after_failover == 1)
-                failover_finish = (*resp_it)->time_sent * results_pre.size();
+                    failover_finish = resp_begin_ptr->time_sent * results_pre.size();
                 
                 for(auto & x : results_pre)
                 {
@@ -179,29 +195,35 @@ void ResponseScan::ResponsesPost()
                         //cout << "podminka :" << abs(correct_responses_after_failover - x.second.pre_failover_ratio/POSITIVE_REP) << endl;
                         if(abs(correct_responses_after_failover - x.second.pre_failover_ratio/POSITIVE_REP) < 0.5 )
                         {
-                            failover_finish = (*resp_it)->time_sent;
-                            cout << "to delete failover finish:" << failover_finish << endl;
-                            t->result_failover_len_ms = (int)(failover_finish - failover_start);
+                            failover_finish = resp_begin_ptr->time_sent;
+                            //cout << "to delete failover finish:" << failover_finish << endl;
+                            
                         }
                     }
                 }
             }
             else
-            correct_responses_after_failover = 0;
+                correct_responses_after_failover = 0;
             
             if(correct_responses_after_failover >= request_buffer_size)
             {
+                t->result_failover_len_ms = (int)(failover_finish - failover_start);
+                t->result_failvoer_precision_ms = (int)((startdiff + resp_begin_ptr->time_sent - last_time_sent)*results_pre.size()/4);
                 cout << "Failover finished: " << failover_finish << endl;
                 cout << "terminating" << endl;
-                * terminate = true;
+                t->terminate = true;
                 return;
             }
         }
         
-        last_time_sent = (*resp_it)->time_sent;
+        last_time_sent = resp_begin_ptr->time_sent;
         
         if(UrlRequester::get_act_time_ms() - timeout_start > t->timeout)
-            *terminate = true;
+        {
+            cout << "timeout reached" << endl;
+            t->terminate = true;
+            return;
+        }
     }
     
 }
@@ -217,7 +239,7 @@ void ResponseScan::CountArraySize()
         if(x.second.pre_failover_ratio > request_buffer_size)
             request_buffer_size = x.second.pre_failover_ratio;
     }
-    cout << "buffer size: " << request_buffer_size << endl;
+    //cout << "buffer size: " << request_buffer_size << endl;
     inside_buffer = 0;
     
     return;
@@ -227,7 +249,7 @@ int ResponseScan::GatherData()//implicit false
 {
     list<Response*>::iterator resp_it;
 
-    while(!*terminate)
+    while(!t->terminate)
     {
         
         //        pthread_mutex_lock(responses_list_mutex);
@@ -251,7 +273,6 @@ int ResponseScan::GatherData()//implicit false
         //        cout << "----------------" << endl;
         
         
-        
         while(true) //no further request sent - the last one was already processed
         {
             pthread_mutex_lock(t->responses_list_mutex);
@@ -264,6 +285,7 @@ int ResponseScan::GatherData()//implicit false
             
             usleep(t->min_interval_ms * 1024);
         }
+        //cout << "resp_pre" << endl;
         
         resp_it = responses->begin();
         
@@ -290,7 +312,7 @@ int ResponseScan::GatherData()//implicit false
                 d.response = message;
                 d.is_set_in_downtime = false;
                 d.times.push_back((*resp_it)->time_sent);
-                cout << "----------------------------------pushing: " << message << "--" << (*resp_it)->time_sent << endl;
+                //cout << "----------------------------------pushing: " << message << "--" << (*resp_it)->time_sent << endl;
                 results_pre.insert(pair<const char *, ResponseData>(message, d));
             }
             else

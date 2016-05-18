@@ -17,12 +17,12 @@ def wait_for_spawn(configData):
         attempts = 0
         while True:
             vm_data = nova.servers.get(vm['id'])
-            if attempts > 30:
+            if attempts > 50:
                 print "VM " + vm['id'] +" is unable to start."
                 exit(4)
             if vm_data.status == 'ACTIVE':
                 break
-            time.sleep(5)
+            time.sleep(3)
             attempts = attempts + 1
     return 1
 
@@ -159,20 +159,9 @@ def reboot_vms(configData):
                            vm['deployment'])
         nova.servers.reboot(vm['id'])
 
-def run_scripts(configData):
-    #TODO
-    # for vm in configData['vms']:
-    #     if "additional_script" in vm and "path_to_key" in vm:
-    #     ssh = subprocess.Popen(["ssh", "%s" % HOST, COMMAND],
-    #                        ...
-    # shell = False,
-    #         ...
-    # stdout = subprocess.PIPE,
-    #          ...
-    # stderr = subprocess.PIPE)
-    return
-
 def build_infrastructure(configData):
+
+
     if launch_vms(configData) == -1:
         return -1
 
@@ -186,10 +175,5 @@ def build_infrastructure(configData):
 
     wait_for_spawn(configData)
 
-    run_scripts(configData)
 
     print " The infrastructure is ready."
-
-
-
-    #TODO run additional scripts

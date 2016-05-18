@@ -73,6 +73,8 @@ long int UrlRequester::get_act_time_ms()
 
 size_t UrlRequester::write_callback_func(void *ptr, size_t size, size_t nmemb, Response *s)
 {
+    string str = (char*)ptr;//TODO to string or to char?
+    //cout << "--------------------------------" << (char*)ptr << " - " << size << " - " << nmemb << endl;
     size_t new_len = s->len + size*nmemb;
     s->ptr = (char*)realloc(s->ptr, new_len+1);
     if (s->ptr == NULL) {
@@ -120,14 +122,19 @@ void * UrlRequester::pull_one_url(void * ptr)
     
     CURLcode res = curl_easy_perform(curl);
     r->time_received = get_act_time_ms();//TODO thread-unsafe?
-    if(res != CURLE_OK)
+    if(res != CURLE_OK || strcmp(r->ptr,"") == 0)
     {
         r->received = false;
+        printf ("--x-%ld--%ld---%ld--x--%s   false\n", r->time_sent, r->time_received-r->time_sent, r->time_received, r->ptr);
+    }
+    else
+    {
+        printf ("--x-%ld--%ld---%ld--x--%s\n", r->time_sent, r->time_received-r->time_sent, r->time_received, r->ptr);
     }
     
     curl_easy_cleanup(curl);
     
-    printf ("--x-%ld--%ld---%ld--x--%s\n", r->time_sent, r->time_received-r->time_sent, r->time_received, r->ptr);
+    
  
 // */
 
@@ -148,6 +155,7 @@ void * UrlRequester::cons_func(void * ptr)
     int thrIndex = 0;
     while(!((TestData *)t)->terminate)
     {
+        //cout << "url "<< !((TestData *)t)->terminate << endl;
         if(!thread_pool[thrIndex].active)
         {
             pthread_mutex_lock(&req_mutex);
@@ -160,6 +168,8 @@ void * UrlRequester::cons_func(void * ptr)
             pthread_mutex_unlock(&req_mutex);
             if(thread_pool[thrIndex].active)
             {
+                //pthread_cancel(thread_pool[thrIndex].thread);
+                //pthread_join(thread_pool[thrIndex].thread,NULL);
                 error = pthread_create(&thread_pool[thrIndex].thread,
                                        NULL, /* default attributes */
                                        pull_one_url,
@@ -170,12 +180,16 @@ void * UrlRequester::cons_func(void * ptr)
                 }
             }
             else
-                usleep(((TestData *)t)->min_interval_ms * 128);
+            {
+                usleep(((TestData *)t)->min_interval_ms);//microseconds
+            }
         }
         else
         {
             if(thrIndex == MAX_THREADS -1)
+            {
                 usleep(((TestData *)t)->min_interval_ms * 128);
+            }
         }
         
         if(thrIndex == MAX_THREADS - 1)
@@ -184,10 +198,13 @@ void * UrlRequester::cons_func(void * ptr)
             thrIndex ++;
         
     }
+    cout << "Joining threads.." << endl;
+    //for(int i=0; i< MAX_THREADS; i++)
+    //    error = pthread_cancel(thread_pool[i].thread);
     for(int i=0; i< MAX_THREADS; i++)
         error = pthread_join(thread_pool[i].thread, NULL);
 
-    pthread_exit(NULL);
+    //pthread_exit(NULL);
     return NULL;
 }
 

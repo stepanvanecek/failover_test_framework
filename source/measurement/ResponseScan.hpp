@@ -44,6 +44,7 @@ public:
 class ResponseScan{
 public:
     ResponseScan(TestData * t);
+    ~ResponseScan();
     int Run();
 private:
     TestData * t;
@@ -54,10 +55,8 @@ private:
     int GatherData();
     
     int totalRequests;
-   // int primary_vms; jako results_pre.size()
+
     list<Response *> * responses;
-    //pthread_mutex_t * responses_list_mutex;
-    
     map<const char *, ResponseData, cmp_str> results_pre;
     
     long startdiff;
@@ -73,14 +72,13 @@ private:
     int correct_responses_after_failover;
     long failover_start;
     long failover_finish;
-//    int * failover_len_ms;
     void CountArraySize();
     void ResponsesPost();
     int request_buffer_size;
     
     int inside_buffer;
     
-    bool * terminate;
+    //bool * terminate;
 };
 
 #endif /* ResponseScan_hpp */
