@@ -7,6 +7,11 @@ OBJS = $(SOURCE_DIR)/main.o $(SOURCE_DIR)/jsoncpp.o $(SOURCE_DIR)/UlrRequester.o
 
 all: compile
 
+install:
+	pip install pycurl
+	pip install commentjson
+	pip install python-novaclient
+
 run:
 	time $(SOURCE_DIR)/program.o password_1234 tmp_data.json config.json
 
