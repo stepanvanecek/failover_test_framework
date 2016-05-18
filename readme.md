@@ -47,12 +47,13 @@ To run the measurement, the configuration file has to be specified. Then it is t
 The test deploys the specified infrastructure, provides the measurement and deletes the VMs it has spawned for the test.
 
 
-Configuration file
-~~~~~~~~~~~~~~~~~~
+#### Configuration file
 
 The configuration files should be stored in directory "config_files" in the root directory of the framework. That's the directory where the framework searches for the configuration files.
 
 The configuration file is a JSON file enabling comments (//). It has a defined structure that needs to be kept.
+
+~~~
 // * = required; o = optional
 
 * id - identifier of the test
@@ -79,17 +80,20 @@ The configuration file is a JSON file enabling comments (//). It has a defined s
 * precision_ms - minimal/desired gap between the requests in milliseconds
 o timeout - timeout in seconds, 300 s if not set
 o notes - notes further describing the 
+~~~
 
 See the example configuration file in config_files/config_example.
 
-Workflow
-~~~~~~~~
+#### Workflow
 
 The configuration file should enable to up an infrastructure with a failover mechanism. The workflow of builing the infrastructure is the following:
 
 1)The specified VMs will be spawned in the specified deployments. As a part of the spawning, the cloud-init scripts are performed rigth after the boot of the VM.
+
 2)The Floating IPs are associated to specified VMs.
+
 3)The VMs are rebooted.
+
 4)The user is given the opportunity to perform manual scripts on the VMs. He is for example able to establish an SSH connection using the SSH keypairs. During this phase, the user must finish the set up of the failover solution. Once the user is finished with the setting, the workflow continues with consecutive steps.
 
 
@@ -100,6 +104,7 @@ Output file
 
  The output file contains the values measured in the text and the specification. It contaains:
 
+~~~
  - downtime - the downtime length in millieconds
  - id - the ID of the test as specified in the config. file
  - notes - notes taken to describe the test in the configuration file
@@ -115,3 +120,4 @@ Output file
  	- image_id - ID of the image
  	- keypair
  	- name
+~~~
