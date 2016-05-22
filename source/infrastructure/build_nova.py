@@ -178,6 +178,9 @@ def allocate_fip(configData):
                 except exceptions.BadRequest:
                     print "VM " + vm['id'] + " is unable to associate a floating ip."
                     exit(4)
+                except exceptions.NotFound:
+                    print "Floating IP " + vm['floating_ip'] + " not found."
+                    exit(4)
 
     return 1
 
