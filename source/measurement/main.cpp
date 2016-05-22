@@ -32,7 +32,8 @@ int main(int argc, const char * argv[])
     ResponseScan c(t);
     c.Run();
     //usleep(30000000);
-    cout << "failover len: " << t->result_failover_len_ms << endl;
+    if(!t->timeout_reached)
+        cout << "Downtime length: " << t->result_failover_len_ms << endl;
     
     WriteOutputStructure(t, argv[3]);
     cout << "Deallocating the resources..." << endl;
@@ -49,15 +50,25 @@ int WriteOutputStructure(TestData * t, const char * frameworkPath)
     Json::Value * config = t->config;
     root["id"] = (*config)["id"];
     root["ts"] = (*config)["launch_time"];
-    root["downtime"] = t->result_failover_len_ms;
-    root["precision"] = t->result_failvoer_precision_ms;
+    if(t->timeout_reached)
+    {
+        root["downtime"] = 0;
+        root["precision"] = 0;
+        root["success"] = false;
+    }
+    else
+    {
+        root["downtime"] = t->result_failover_len_ms;
+        root["precision"] = t->result_failvoer_precision_ms;
+    }
+
     root["vms"] = (*config)["vms"];;
     root["notes"] = (*config)["notes"];
     
     Json::StyledStreamWriter writer;
     string path = frameworkPath;
     path += "/results/" + (*config)["output"]["file"].asString();
-    cout << "Writing to output file " << (*config)["output"]["file"].asString() << endl;
+    cout << "Writing the output file to " << path << endl;
     ofstream test1(path);
     writer.write(test1,root);
     
