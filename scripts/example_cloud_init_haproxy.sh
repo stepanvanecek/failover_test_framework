@@ -34,8 +34,8 @@ listen webfarm 0.0.0.0:80
     balance roundrobin
     option httpclose
     option forwardfor
-    server apache1 80.156.222.96:80 check
-    server apache2 87.190.238.22:80 check
+    server apache1 <floating_ip1>:80 check
+    server apache2 <floating_ip2>:80 check
 
 EOL
 

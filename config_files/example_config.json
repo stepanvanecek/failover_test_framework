@@ -19,7 +19,7 @@
 			"flavor" : 21,
 			"deployment" : "dd1a",
 			"keypair" : "lenovo-keypair-cah",
-			"floating_ip" : "80.156.222.96",
+			"floating_ip" : "<floating_ip1>",
 			"cloud_init" : "scripts/example_cloud_init_apache.sh"
 		},
 		{
@@ -28,7 +28,7 @@
 			"flavor" : 21,
 			"deployment" : "dd2a",
 			"keypair" : "lenovo-keypair-dd2a",
-			"floating_ip" : "87.190.238.22",
+			"floating_ip" : "<floating_ip2>",
 			"cloud_init" : "scripts/example_cloud_init_apache.sh"
 		},
 		{
