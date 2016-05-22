@@ -3,6 +3,7 @@
 import os
 import sys
 import commentjson
+import time
 import json
 import datetime
 from parse_input import check_config_structure
@@ -64,6 +65,8 @@ if __name__ == "__main__":
         exit(1)
     print " Request received."
     print "---"
+
+    time.sleep(5)
 
     #configData['test_url']['full_url'] = "87.190.239.41" #TODO zakomentovat
 

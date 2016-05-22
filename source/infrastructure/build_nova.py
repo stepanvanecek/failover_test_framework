@@ -203,9 +203,9 @@ def build_infrastructure(configData):
     if allocate_fip(configData) == -1:
         return -1
 
-    #time.sleep(10)
+    time.sleep(5)
 
-    reboot_vms(configData)
+    #reboot_vms(configData)
 
     wait_for_spawn(configData)
 
