@@ -1,0 +1,63 @@
+// Configuration for an example run.
+//
+// To run this test, it is necessary to fill in the IP addresses of the upstream servers.
+// Replace the "<floating_ip>" with floating IPs the upstream servers will have.
+// The floating IP must be an allocated floating IP that is able to be associated.
+// 1) Replace the value of floating_ip of VMs "apache1" and "apache2" in this configuration file.
+// 2) Eventually replace the deployment if the floating IP is available in another deployment.
+// 3) In the cloud_init script "scripts/example_cloud_init_haproxy.sh", replace the IP address
+// 		in the configuration of HAProxy when servers "apache1" and "apache2" are defined.
+//
+
+{
+	"id" : "test_run",
+	"vms" :
+	[
+		{
+			"name" : "apache1",
+			"image_id" : "0febe032-d5ba-484d-83e3-3cb791c1f5f5",
+			"flavor" : 21,
+			"deployment" : "dd1a",
+			"keypair" : "lenovo-keypair-cah",
+			"floating_ip" : "80.156.222.96",
+			"cloud_init" : "scripts/example_cloud_init_apache.sh"
+		},
+		{
+			"name" : "apache2",
+			"image_id" : "bd4d265f-2aa5-4c21-b081-90f207781921",
+			"flavor" : 21,
+			"deployment" : "dd2a",
+			"keypair" : "lenovo-keypair-dd2a",
+			"floating_ip" : "87.190.238.22",
+			"cloud_init" : "scripts/example_cloud_init_apache.sh"
+		},
+		{
+			"name" : "proxy_server",
+			"image_id" : "ced1e439-aadc-4d25-b358-25530d52e398",
+			"flavor" : "cloudcompute.xs",
+			"keypair" : "sv-cah-dd2c",
+			"deployment" : "dd2c",
+			"floating_ip" : true,
+			"cloud_init" : "scripts/example_cloud_init_haproxy.sh"
+		}
+	],
+	"test_url" : 
+	{
+		"machine" : "proxy_server",
+		"path" : ""
+	},
+	"output" : 
+	{
+		"file" : "test_result.json"
+	},
+	"failover_trigger" : "nova stop apache1",//uses your OpenStack credentials that you should have in the environment variables
+	"creds" :
+	{
+		"os_username" : "stepan.vanecek@cloudandheat.com",
+		"os_tenant_name" : "cah-stepanvanecek"
+		
+	},
+	"precision_ms" : 20,
+	"timeout" : 30,
+	"notes" : "test run. deploys an HAProxy reverse proxy server and two upstream nodes running Apache webserver."
+}

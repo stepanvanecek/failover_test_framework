@@ -1,0 +1,47 @@
+{
+	"downtime" : 11208,
+	"id" : "test_run",
+	"notes" : "test run. deploys an HAProxy reverse proxy server and two upstream nodes running Apache webserver.",
+	"precision" : 20,
+	"ts" : "2016/05/22-22:14:44",
+	"vms" : 
+	[
+		{
+			"auth_url" : "https://identity-dd1a.cloudandheat.com:5000/v2.0",
+			"cloud_init" : "scripts/example_cloud_init_apache.sh",
+			"deployment" : "dd1a",
+			"flavor" : 21,
+			"floating_ip" : "80.156.222.96",
+			"id" : "f9d81363-4efd-4514-8072-900828ece76f",
+			"image_id" : "0febe032-d5ba-484d-83e3-3cb791c1f5f5",
+			"keypair" : "lenovo-keypair-cah",
+			"name" : "apache1",
+			"vm_name" : "apache1"
+		},
+		{
+			"auth_url" : "https://identity-dd2a.cloudandheat.com:5000/v2.0",
+			"cloud_init" : "scripts/example_cloud_init_apache.sh",
+			"deployment" : "dd2a",
+			"flavor" : 21,
+			"floating_ip" : "87.190.238.22",
+			"id" : "33b216eb-3b0b-4cf1-bb4e-6158829fdca0",
+			"image_id" : "bd4d265f-2aa5-4c21-b081-90f207781921",
+			"keypair" : "lenovo-keypair-dd2a",
+			"name" : "apache2",
+			"vm_name" : "apache2"
+		},
+		{
+			"auth_url" : "https://identity-dd2c.cloudandheat.com:5000/v2.0",
+			"cloud_init" : "scripts/example_cloud_init_haproxy.sh",
+			"deployment" : "dd2c",
+			"flavor" : "cloudcompute.xs",
+			"floating_ip" : true,
+			"floating_ip_addr" : "87.190.239.41",
+			"id" : "eac4d6ba-d385-4bc0-a57d-bd582a064add",
+			"image_id" : "ced1e439-aadc-4d25-b358-25530d52e398",
+			"keypair" : "sv-cah-dd2c",
+			"name" : "proxy_server",
+			"vm_name" : "proxy_server"
+		}
+	]
+}
