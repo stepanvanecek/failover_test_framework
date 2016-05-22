@@ -1,13 +1,14 @@
 // Configuration for an example run.
 //
 // To run this test, it is necessary to fill in the IP addresses of the upstream servers.
-// Replace the "<floating_ip>" with floating IPs the upstream servers will have.
 // The floating IP must be an allocated floating IP that is able to be associated.
+// Replace the "<floating_ip>" with floating IPs the upstream servers will have.
 // 1) Replace the value of floating_ip of VMs "apache1" and "apache2" in this configuration file.
 // 2) Eventually replace the deployment if the floating IP is available in another deployment.
 // 3) In the cloud_init script "scripts/example_cloud_init_haproxy.sh", replace the IP address
-// 		in the configuration of HAProxy when servers "apache1" and "apache2" are defined.
-//
+// 	in the configuration of HAProxy when servers "apache1" and "apache2" are defined.
+// 4) Specify the environmental variables to fit the deployment in which you want to stop the VM.
+//	The command "nova stop apache1" expects: OS_AUTH_URL, OS_USERNAME, OS_PASSWORD, OS_TENANT_ID.
 
 {
 	"id" : "test_run",
