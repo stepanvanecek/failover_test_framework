@@ -13,7 +13,7 @@ python $SOURCE_DIR/infrastructure/main.py $OS_PASSWORD_INPUT $TMP_FILE $DIR $1
 ###perform the measurement
 if [[ $? == 10 ]]; then
 	#echo "c prog"
-	$SOURCE_DIR/measurement/program.o $OS_PASSWORD_INPUT $TMP_FILE $1
+	$SOURCE_DIR/measurement/program.o $OS_PASSWORD_INPUT $TMP_FILE $DIR $1
 fi
 
 ###remove the infrastructure
