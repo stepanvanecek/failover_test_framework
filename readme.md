@@ -66,7 +66,7 @@ The configuration file is a JSON file enabling comments (//). It has a defined s
 	* deployment - deployment to launch the VM in
 	o keypair - name of the key
 	o sec_group - array of security group names, "default" is used by default
-	o floating_ip - if set to true, floating IP will be associated
+	o floating_ip - if set to true, floating IP will be associated. If a floating IP is specified, that IP will be associated with the VM.
 	o cloud_init - path to the cloud-init script
 * test_url
 	o machine - name of a VM with a Floating IP to address
