@@ -85,7 +85,7 @@ o incorrect_responses - array with content that is considered wrong
 o notes - notes further describing the
 ~~~
 
-See an example configuration file in 'config_files/config_example.json'.
+See an example configuration file in 'config_files/example_config.json'.
 
 #### Workflow
 
@@ -124,3 +124,9 @@ Output file
  	* keypair
  	* name
 ~~~
+
+
+Test it yourself
+----------------
+
+To run a measurement with predefined failover scenario, just follow the steps in 'config_files/example_config.json'. Then trigger the test with the following command `./run.sh example_config.json`
