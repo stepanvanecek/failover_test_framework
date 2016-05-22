@@ -30,10 +30,8 @@ void * UrlRequester::t;
 UrlRequester::UrlRequester(void * v)
 {
     t = v;
-//    this->timeout = (((TestData *)t)->min_interval_ms * MAX_THREADS > MIN_TIMEOUT)? (long)(((TestData *)t)->min_interval_ms * MAX_THREADS): MIN_TIMEOUT;
 
     pthread_mutex_init(&req_mutex, NULL);
-
     pthread_mutex_init(&responses_list_mutex, NULL);
 
     ((TestData *)t)->responses_list_mutex = & responses_list_mutex;
@@ -124,10 +122,8 @@ void * UrlRequester::pull_one_url(void * ptr)
     }
     else
     {
-        //printf ("--x-%ld--%ld---%ld--x--%s\n", r->time_sent, r->time_received-r->time_sent, r->time_received, r->ptr);
-//        cout << "abcd";
+//        printf ("--x-%ld--%ld---%ld--x--%s\n", r->time_sent, r->time_received-r->time_sent, r->time_received, r->ptr);
 //        Json::Value v = ((TestData*)(t))->config;
-//        cout << "asdf";
 //        if (v.isMember("incorrect_responses"))
 //        {
 //            for (auto itr : v["incorrect_responses"])
@@ -137,7 +133,6 @@ void * UrlRequester::pull_one_url(void * ptr)
 //                    r->received = false;
 //            }
 //        }
-//        cout << "ppppp" << endl;
     }
     
     curl_easy_cleanup(curl);

@@ -177,18 +177,29 @@ void ResponseScan::ResponsesPost()
             {
                 correct_responses_after_failover ++;
                 if(correct_responses_after_failover == 1)
-                    failover_finish = resp_begin_ptr->time_sent * results_pre.size();
+                {
+                    failover_finish = last_time_sent;
+                    //4cout << "to delete failover finish1:" << failover_finish << endl;
+
+                }
                 
                 for(auto & x : results_pre)
                 {
                     if(x.second.is_set_in_downtime)
                     {
-                        //cout << "podminka :" << abs(correct_responses_after_failover - x.second.pre_failover_ratio/POSITIVE_REP) << endl;
-                        if(abs(correct_responses_after_failover - x.second.pre_failover_ratio/POSITIVE_REP) < 0.5 )
+                        //cout << "condition :" << abs(correct_responses_after_failover - x.second.pre_failover_ratio/POSITIVE_REP) << endl;
+                        if(abs(correct_responses_after_failover - x.second.pre_failover_ratio) < 0.5 )
                         {
-                            failover_finish = resp_begin_ptr->time_sent;
-                            //cout << "to delete failover finish:" << failover_finish << endl;
                             
+                            //failover_finish = resp_begin_ptr->time_sent;
+                            //cout << "to delete failover finish:" << failover_finish << endl;
+                            //cout << "---------" << correct_responses_after_failover << "--" << x.second.pre_failover_ratio << "----" << POSITIVE_REP << endl;
+                            t->result_failover_len_ms = (int)(failover_finish - failover_start);
+                            t->result_failvoer_precision_ms = (int)((startdiff + resp_begin_ptr->time_sent - last_time_sent)*results_pre.size()/4);
+                            cout << "Failover finished: " << failover_finish << endl;
+                            //cout << "terminating" << endl;
+                            t->terminate = true;
+                            return;
                         }
                     }
                 }
@@ -200,8 +211,8 @@ void ResponseScan::ResponsesPost()
             {
                 t->result_failover_len_ms = (int)(failover_finish - failover_start);
                 t->result_failvoer_precision_ms = (int)((startdiff + resp_begin_ptr->time_sent - last_time_sent)*results_pre.size()/4);
-                cout << "Failover finished: " << failover_finish << endl;
-                cout << "terminating" << endl;
+                cout << "Failover finish: " << failover_finish << endl;
+                //cout << "terminating" << endl;
                 t->terminate = true;
                 return;
             }
@@ -211,7 +222,8 @@ void ResponseScan::ResponsesPost()
         
         if(UrlRequester::get_act_time_ms() - timeout_start > t->timeout)
         {
-            cout << "timeout reached" << endl;
+            cout << "Timeout reached" << endl;
+            t->timeout_reached = true;
             t->terminate = true;
             return;
         }
@@ -275,11 +287,10 @@ int ResponseScan::GatherData()
                 d.count = 1;
                 char * message = (char*)malloc(sizeof(char)*(*resp_it)->len + 1);
                 memcpy(message, (*resp_it)->ptr, sizeof(const char)*(*resp_it)->len + 1);
-                //memcpy(s->ptr+s->len, ptr, size*nmemb);
                 d.response = message;
                 d.is_set_in_downtime = false;
                 d.times.push_back((*resp_it)->time_sent);
-                //cout << "----------------------------------pushing: " << message << "--" << (*resp_it)->time_sent << endl;
+
                 results_pre.insert(pair<const char *, ResponseData>(message, d));
             }
             else
