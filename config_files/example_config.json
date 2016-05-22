@@ -5,6 +5,7 @@
 // Replace the "<floating_ip>" with floating IPs the upstream servers will have.
 // 1) Replace the value of floating_ip of VMs "apache1" and "apache2" in this configuration file.
 // 2) Eventually replace the deployment if the floating IP is available in another deployment.
+//	When a deployment is being changed, the image ID must be updated as well (to Ubuntu 14.04)
 // 3) In the cloud_init script "scripts/example_cloud_init_haproxy.sh", replace the IP address
 // 	in the configuration of HAProxy when servers "apache1" and "apache2" are defined.
 // 4) Specify the environmental variables to fit the deployment in which you want to stop the VM.
