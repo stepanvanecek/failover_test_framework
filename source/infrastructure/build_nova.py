@@ -211,5 +211,7 @@ def build_infrastructure(configData):
     #reboot_vms(configData)
 
     wait_for_spawn(configData)
+    
+    time.sleep(5)
 
     print " The infrastructure is ready."
