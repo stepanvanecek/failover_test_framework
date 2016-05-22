@@ -9,6 +9,7 @@
 // 	in the configuration of HAProxy when servers "apache1" and "apache2" are defined.
 // 4) Specify the environmental variables to fit the deployment in which you want to stop the VM.
 //	The command "nova stop apache1" expects: OS_AUTH_URL, OS_USERNAME, OS_PASSWORD, OS_TENANT_ID.
+// 5) After the VMs are built, check that the load balancing installation works properly.
 
 {
 	"id" : "test_run",
