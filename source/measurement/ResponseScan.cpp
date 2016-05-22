@@ -36,7 +36,6 @@ int ResponseScan::Run()
     GatherData();
 
     CountArraySize();
-    //TODO spocitat prumerne neuspechy, aby se potom mohly tolerovat
     
     TriggerFailover();
     
@@ -108,7 +107,7 @@ void ResponseScan::ResponsesPost()
                 
                 startdiff = failover_start - last_time_sent;
                 
-                cout << "failover start: " << failover_start << " precision: " << startdiff << endl;
+                cout << "Failover start: " << failover_start << " precision: " << startdiff << endl;
                 correct_responses_after_failover = 0;
             }
             //5.3.2.4 initially scan everything
@@ -130,9 +129,7 @@ void ResponseScan::ResponsesPost()
                     bool found = false;
                     if(!x.second.post_checked)
                     {
-                        //x.first je jmeno masiny ve failoveru
                         x.second.is_set_in_downtime = true;
-                        //cout << "DOWNTIME: " << x.first << endl;
                         found = true;
                     }
                     if(found)
@@ -170,7 +167,6 @@ void ResponseScan::ResponsesPost()
                 if(!x.second.post_checked)
                 {
                     x.second.is_set_in_downtime = true;
-                    //cout << "DOWNTIME: " << x.first << endl;
                 }
             }
             if(resp_begin_ptr->received)
@@ -179,8 +175,6 @@ void ResponseScan::ResponsesPost()
                 if(correct_responses_after_failover == 1)
                 {
                     failover_finish = last_time_sent;
-                    //4cout << "to delete failover finish1:" << failover_finish << endl;
-
                 }
                 
                 for(auto & x : results_pre)
@@ -190,14 +184,9 @@ void ResponseScan::ResponsesPost()
                         //cout << "condition :" << abs(correct_responses_after_failover - x.second.pre_failover_ratio/POSITIVE_REP) << endl;
                         if(abs(correct_responses_after_failover - x.second.pre_failover_ratio) < 0.5 )
                         {
-                            
-                            //failover_finish = resp_begin_ptr->time_sent;
-                            //cout << "to delete failover finish:" << failover_finish << endl;
-                            //cout << "---------" << correct_responses_after_failover << "--" << x.second.pre_failover_ratio << "----" << POSITIVE_REP << endl;
                             t->result_failover_len_ms = (int)(failover_finish - failover_start);
                             t->result_failvoer_precision_ms = (int)((startdiff + resp_begin_ptr->time_sent - last_time_sent)*results_pre.size()/4);
                             cout << "Failover finished: " << failover_finish << endl;
-                            //cout << "terminating" << endl;
                             t->terminate = true;
                             return;
                         }
@@ -212,7 +201,6 @@ void ResponseScan::ResponsesPost()
                 t->result_failover_len_ms = (int)(failover_finish - failover_start);
                 t->result_failvoer_precision_ms = (int)((startdiff + resp_begin_ptr->time_sent - last_time_sent)*results_pre.size()/4);
                 cout << "Failover finish: " << failover_finish << endl;
-                //cout << "terminating" << endl;
                 t->terminate = true;
                 return;
             }

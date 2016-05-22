@@ -24,7 +24,6 @@ int TestData::ParseInputJson(string tmp_file)
         exit(1);
     }
     
-    
     //TODO try catch
     url = (*config)["test_url"]["full_url"].asString();
     terminate_command = (*config)["failover_trigger"].asString();
@@ -54,7 +53,6 @@ TestData::TestData(const char * url, int min_interval_ms)
 {
     terminate = false;
     responses = new list<Response*>();
-    //this->url = url;
     this->min_interval_ms = min_interval_ms;
 }
 

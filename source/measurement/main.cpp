@@ -27,11 +27,9 @@ int main(int argc, const char * argv[])
     UrlRequester *r = new UrlRequester((void*)t);
     r->Run();
 
-    //usleep(200000);
-
     ResponseScan c(t);
     c.Run();
-    //usleep(30000000);
+
     if(!t->timeout_reached)
         cout << "Downtime length: " << t->result_failover_len_ms << endl;
     

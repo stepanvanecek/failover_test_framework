@@ -41,12 +41,6 @@ UrlRequester::UrlRequester(void * v)
 UrlRequester::~UrlRequester()
 {
     pthread_join(generator, NULL);
-//    int error;
-//    for(int i=0; i< MAX_THREADS; i++) {
-//        error = pthread_join(cons_pool[i].thread, NULL);
-//    }
-    
-    //delete [] cons_pool;
 }
 
 int UrlRequester::Run()
@@ -74,7 +68,6 @@ long int UrlRequester::get_act_time_ms()
 size_t UrlRequester::write_callback_func(void *ptr, size_t size, size_t nmemb, Response *s)
 {
     string str = (char*)ptr;//TODO to string or to char?
-    //cout << "--------------------------------" << (char*)ptr << " - " << size << " - " << nmemb << endl;
     size_t new_len = s->len + size*nmemb;
     s->ptr = (char*)realloc(s->ptr, new_len+1);
     if (s->ptr == NULL) {
@@ -101,7 +94,6 @@ void * UrlRequester::pull_one_url(void * ptr)
     ((TestData *)t)->responses->push_back(r);
     pthread_mutex_unlock(&responses_list_mutex);
 
-    //cout << "url being sent: " << ((TestData *)t)->url << " at time: " << r->time_sent << endl;
     curl_easy_setopt(curl, CURLOPT_URL, ((TestData *)t)->url.c_str());
     curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_callback_func);
     curl_easy_setopt(curl, CURLOPT_WRITEDATA, r);
@@ -154,7 +146,6 @@ void * UrlRequester::cons_func(void * ptr)
     int thrIndex = 0;
     while(!((TestData *)t)->terminate)
     {
-        //cout << "url "<< !((TestData *)t)->terminate << endl;
         if(!thread_pool[thrIndex].active)
         {
             pthread_mutex_lock(&req_mutex);
@@ -167,8 +158,6 @@ void * UrlRequester::cons_func(void * ptr)
             pthread_mutex_unlock(&req_mutex);
             if(thread_pool[thrIndex].active)
             {
-                //pthread_cancel(thread_pool[thrIndex].thread);
-                //pthread_join(thread_pool[thrIndex].thread,NULL);
                 error = pthread_create(&thread_pool[thrIndex].thread,
                                        NULL, /* default attributes */
                                        pull_one_url,
@@ -198,12 +187,10 @@ void * UrlRequester::cons_func(void * ptr)
         
     }
     cout << "Joining threads.." << endl;
-    //for(int i=0; i< MAX_THREADS; i++)
-    //    error = pthread_cancel(thread_pool[i].thread);
+
     for(int i=0; i< MAX_THREADS; i++)
         error = pthread_join(thread_pool[i].thread, NULL);
 
-    //pthread_exit(NULL);
     return NULL;
 }
 
