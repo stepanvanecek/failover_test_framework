@@ -18,7 +18,7 @@
 
 #define TIMEOUT 5000
 #define CONNECTTIMEOUT 2000
-#define MAX_THREADS 1000
+#define MAX_THREADS 500
 
 
 pthread_mutex_t UrlRequester::req_mutex;
@@ -186,6 +186,7 @@ void * UrlRequester::cons_func(void * ptr)
             thrIndex ++;
         
     }
+    usleep(3000000);
     cout << "Joining threads.." << endl;
 
     for(int i=0; i< MAX_THREADS; i++)
